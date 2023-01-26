@@ -11,6 +11,40 @@ And outputs a dataframe with log10 likelihood ratios of being a match for each m
 - [GitHub](https://github.com/oyvble/euroformix)
 - [Website that explains GUI](http://www.euroformix.com/)
 
+## Data requirements
+
+Formats for each dataset required for this pipeline are shown below.
+
+### Population allele frequency
+
+Population frequencies for each allele at each locus should be supplied in a .csv file with one column for each STR marker and one row for each allele. The alleles should be listed in a column titled "Allele". The first two rows of an example table with the loci from the Promega Geneprint10 kit is shown below:
+
+| Allele | TH01 | D21S11 | D5S818 | D13S317 | D7S820 | D16S539 | CSF1PO | AMEL | vWA | TPOX |
+|:------:|:----:|:------:|:------:|:-------:|:------:|:------:|:----:|:---:|:----:|:---:|
+|6|0.206957| | | | | | | | |0.098276|
+|8|0.250435| |0.06117|0.021053|0.187716|0.033304|0.042205| | |0.24569|
+
+
+### Human STR profiles (the "reference")
+
+The human reference STR profiles should be supplied in a .csv file with one row per STR marker for each person. The column headings should be formmated as shown in the example rows below:
+
+|SampleName|Marker|Allele1|Allele2|
+|:---:|:---:|:---:|:---:|
+|Person_1|TH01|6|8|
+|Person_1|D21S11|29|30|
+
+
+### Mosquito STR profiles (the "evidence")
+
+The mosquito STR profiles (evidence samples) should be supplied in a .csv file with one rwo per STR marker for each sample. The column headings should be formatted as shown in the example rows below:
+
+|SampleName|Marker|Allele1|Allele2|Allele3|Allele4|...|Height1|Height2|Height3|Height4|...|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|Sample_1|TH01|6|8|9| | |4887|4662|9104| | |
+|Sample_1|D21S11|27|28|30| | |4402|8325|2181| | |
+
+
 ## Installing euroformix
 
 First, [download miniconda](https://docs.conda.io/en/latest/miniconda.html) for linux if you don't already have it:
