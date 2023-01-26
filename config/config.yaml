@@ -1,0 +1,19 @@
+# Config file for running euroformix using snakemake pipeline
+
+# Input file pathnames, change if needed
+# See README for more information on formatting input files
+pop_freqs_csv: 'data/pop_freqs.csv' # population allele frequencies; csv required
+hum_profiles_csv: 'data/human_profiles.csv' # human STR profiles; csv required
+moz_profiles_csv: 'data/mosquito_profiles.csv' # mosquito STR profiles; csv required
+
+# Default output file path names 
+outfile: 'results/log10LRs.csv' # csv output
+
+# Number of jobs allowed to be going at once - people might be mad if this number is too high
+jobs: 4999
+
+## You shouldn't have to change this part
+cluster-config: "config/cluster.yaml"
+cluster: "sbatch --job-name={cluster.jobname} --nodes={cluster.nodes} --ntasks-per-node={cluster.ntaskspernode} --cpus-per-task={cluster.cpuspertask} --mem-per-cpu={cluster.mempercpu} --time={cluster.time} --account={cluster.account} --partition={cluster.partition} --mail-user={cluster.mailuser} --mail-type={cluster.mailtype} --output={cluster.output} --export=ALL "
+verbose: true
+notemp: true
