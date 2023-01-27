@@ -72,14 +72,14 @@ Useful snakemake arguments (see below for more on snakemake):
 - ` snakemake --dag | dot -Tsvg > dag.svg` creates a dag (this can be super difficult to read with large complex pipelines)
 
 To run the pipeline on the cluster, you have to modify:
-- `euroformix.sbat` (email address)
-- `config/cluster.yml` (email address)
+- `scripts/submit_slurm.sbat` (email address)
+- `config/slurm/cluster.yml` (email address)
 - `config/config.yml` (paths to data; possibly other parameters)
 
 Then run:
 ```
 conda activate euroformix # activate the conda environment
-sbatch euroformix.sbat # submit the job to the cluster
+sbatch scripts/submit_slurm.sbat # submit the job to the cluster
 ```
 
 ## Learning more about snakemake

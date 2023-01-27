@@ -1,0 +1,13 @@
+name: euroformix
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - r
+dependencies:
+  - r-tidyverse
+  - r-devtools
+  - r-plotly
+  - r-codetools
+  - r-cubature
+  - snakemake
