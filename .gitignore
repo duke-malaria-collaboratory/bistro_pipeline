@@ -3,3 +3,4 @@ data_orig/
 logs/*out
 .snakemake/
 output/
+logs/old/

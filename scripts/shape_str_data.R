@@ -8,7 +8,7 @@
 #################################################
 
 # Load libraries
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 library(euroformix)
 
 # Load STR profile data

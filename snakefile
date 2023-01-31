@@ -13,11 +13,16 @@ hum_profiles_csv = config['hum_profiles_csv']
 moz_profiles_csv = config['moz_profiles_csv']
 hum_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", hum_profiles_csv)
 moz_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", moz_profiles_csv)
+min_noc_csv = 'output/data/min_noc.csv'
 hu_allele_freqs_rds = 'output/' + re.sub(".csv", ".rds", hu_allele_freqs_csv)
 hum_profiles_rds = re.sub("_formatted.csv", ".rds", hum_profiles_formatted)
 outfile = config['outfile']
 kit = config['kit']
+nocs = config['noc']
+threshT = config['threshT']
+difftol = config['difftol']
 threads = config['threads']
+seed = config['seed']
 
 # get mozzie ids
 with open(moz_profiles_csv) as f:
@@ -34,10 +39,13 @@ rule all:
 rule format_input_csvs:
   input:
     hum_profiles_csv,
-    moz_profiles_csv
+    moz_profiles_csv,
+  params: 
+    threshT
   output:
     hum_profiles_formatted,
-    moz_profiles_formatted
+    moz_profiles_formatted,
+    min_noc_csv
   script:
     'scripts/format_input_csvs.R'
 
@@ -60,20 +68,25 @@ rule calc_logLR:
   input:
     hu_allele_freqs_rds,
     hum_profiles_rds,
-    moz_profiles_csv,
+    moz_profiles_formatted,
+    #min_noc_csv,
     'output/data/mozzies/{moz_id}_profile.rds'
   params:
-    kit,
-    threads
+    kit=kit,
+    noc=lambda wildcards: wildcards.noc, 
+    threshT=threshT,
+    difftol=difftol,  
+    threads=threads,
+    seed=seed
   output:
-    'output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv'
+    'output/log10LRs_by_mozzie/{moz_id}_noc{noc}_log10LRs.csv'
   script:
     'scripts/calc_logLR.R'
 
 # combine likelihood ratios for all mosquitoes 
 rule combine_output:
   input:
-    expand('output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv', moz_id=moz_ids)
+    expand('output/log10LRs_by_mozzie/{moz_id}_noc{noc}_log10LRs.csv', moz_id=moz_ids, noc=nocs)
   output:
     outfile
   script:

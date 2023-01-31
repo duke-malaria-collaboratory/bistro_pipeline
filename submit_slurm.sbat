@@ -11,3 +11,4 @@
 
 # Job commands
 snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml
+#snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml --rerun-triggers mtime

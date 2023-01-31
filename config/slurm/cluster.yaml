@@ -7,10 +7,10 @@ __default__:
   time: "24:00:00"
   #partition: "standard"
   mailuser: "zl338@duke.edu" # ENTER EMAIL BETWEEN QUOTES
-  mailtype: "END,FAIL"
+  mailtype: "NONE"
   output: "logs/%x-%j.out"
 
 # modify config for certain rules
-plot_histogram:
-  time: "10:00"
+calc_log10LR:
+  time: "48:00:00"
 

@@ -11,5 +11,8 @@ outfile: 'output/log10LRs.csv' # csv output
 
 # Other parameters
 kit: "GenePrint10" # STR kit name
-threads: 4 # number of threads to use when calculating LRs
-
+noc: [1,2,3] # number of contributors in model
+threshT: 200 # peak detection threshold (all peaks under this threshold are filtered out)
+difftol: 1 # tolerance for difference in log likelihoods across 2 iterations
+threads: 4 # number of threads to use when calculating log10LRs
+seed: 1 # seed when calculating log10LRs

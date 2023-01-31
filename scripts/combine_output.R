@@ -8,7 +8,7 @@
 #################################################
 
 # Load libraries
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 
 # Get list of filenames
 my_filenames <- snakemake@input[[1]] 
