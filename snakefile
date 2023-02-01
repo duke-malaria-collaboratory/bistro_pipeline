@@ -23,6 +23,7 @@ threshT = config['threshT']
 difftol = config['difftol']
 threads = config['threads']
 seed = config['seed']
+time_limit = config['time_limit']
 
 # get mozzie ids
 with open(moz_profiles_csv) as f:
@@ -77,7 +78,8 @@ rule calc_logLR:
     threshT=threshT,
     difftol=difftol,  
     threads=threads,
-    seed=seed
+    seed=seed,
+    time_limit=time_limit
   output:
     'output/log10LRs_by_mozzie/{moz_id}_noc{noc}_log10LRs.csv'
   script:

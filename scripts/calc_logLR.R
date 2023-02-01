@@ -26,9 +26,33 @@ if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){
   write_csv(snakemake@output[[1]])
 }else{
 
-# Read in data and set parameters
+# Read in data
 freq_list <- read_rds(snakemake@input[[1]])
 sample <- read_rds(snakemake@input[[4]])
+
+# Don't run euroformixe if none of the peaks in the sample are in the reference dataset
+freq_df <- freq_list %>%
+    map(enframe) %>%
+    bind_rows(.id='Marker') %>% 
+    rename(adata = name, freq = value)
+no_ref_peaks <- sample[[1]] %>%
+    map(as_tibble) %>%
+    bind_rows(.id='Marker') %>%
+    left_join(freq_df) %>%
+    summarize(all_na = all(is.na(freq))) %>%
+    pull(all_na)
+
+if(no_ref_peaks){
+  # Write empty file if mozzie profile doesn't have any peaks in ref db
+  tibble(sample_evidence = snakemake@wildcards$moz_id,
+         sample_reference = NA,
+         noc = noc,
+         log10LR = NA,
+         note = 'No peaks in reference database') %>%
+  write_csv(snakemake@output[[1]])
+}else{
+
+# Read in more data and set parameters
 refData <- read_rds(snakemake@input[[2]])
 numRefs <- length(refData)
 kit <- snakemake@params[[1]]
@@ -40,6 +64,7 @@ threshT <- snakemake@params[[3]]
 difftol <- snakemake@params[[4]]
 threads <- snakemake@params[[5]]
 seed <- snakemake@params[[6]]
+time_limit <- snakemake@params[[7]] # in hours
 
 cat(paste0('NOC: ', noc, '\n'))
 cat(paste0('Number of references: ', numRefs, '\n'))
@@ -49,19 +74,32 @@ cat(paste0('Calculating log10LRs for each reference\n'))
 LRs_1moz <- tibble(sample_evidence = character(numRefs), sample_reference = NA, noc = noc, log10LR = NA, note = NA)
 
 # Calcualte logLR for each human
+time_try <- tryCatch({
+{
+setTimeLimit(60*60*time_limit) # in seconds
 for(i in 1:numRefs){
   print(i)  
-  output <- contLikSearch(NOC=noc, modelDegrad=TRUE, modelBWstutt=FALSE, modelFWstutt=FALSE, samples=sample, popFreq=freq_list, refData=refData, condOrder=rep(0,length(refData)), knownRefPOI=i, prC=0.05, threshT=threshT, lambda=0.01, kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
+  out <- tryCatch({output <- contLikSearch(NOC=noc, modelDegrad=TRUE, modelBWstutt=FALSE, modelFWstutt=FALSE, samples=sample, popFreq=freq_list, refData=refData, condOrder=rep(0,length(refData)), knownRefPOI=i, prC=0.05, threshT=threshT, lambda=0.01, kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
+    return(output$outtable[3])
+    },
+    error = function(cond) return(NA)
+)
   
   LRs_1moz$sample_evidence[i] <- names(sample)
   LRs_1moz$sample_reference[i] <- names(refData)[i]
-  LRs_1moz$log10LR[i] <- output$outtable[3]
-  #LRs_1moz$log10LR_2[i] <- output$outtable[2,3]
-  #LRs_1moz$log10LR_3[i] <- output$outtable[3,3]
- 
+  LRs_1moz$log10LR[i] <- out
+  if(is.na(out)) LRs_1moz$note = 'euroformix error'
+  
 }
 
-# Save df as .csv
-write_csv(LRs_1moz, snakemake@output[[1]])
 }
-          
+},
+error = function(cond) return('Timed out')
+)
+
+# Save df as .csv
+LRs_1moz %>% 
+    mutate(note = ifelse(is.na(log10LR) & time_try == 'Timed out', 'Timed out', note)) %>%
+    write_csv(snakemake@output[[1]])
+}
+} 

@@ -6,9 +6,9 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --export=ALL
 # Number of cores, amount of memory, and walltime
-#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=1 --mem=1g --time=10:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=1 --mem=1g --time=96:00:00
 #SBATCH -o logs/slurm-%j_%x.out # File for STDOUT (with jobid = %j)
 
 # Job commands
-snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml
-#snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml --rerun-triggers mtime
+#snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml
+snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml --rerun-triggers mtime

@@ -11,6 +11,6 @@ __default__:
   output: "logs/%x-%j.out"
 
 # modify config for certain rules
-calc_log10LR:
+calc_logLR:
   time: "48:00:00"
 
