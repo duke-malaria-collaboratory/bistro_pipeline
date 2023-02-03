@@ -8,17 +8,16 @@ import csv
 configfile: "config/config.yaml"
 
 # get paths
-hu_allele_freqs_csv = config['hu_allele_freqs_csv']
 hum_profiles_csv = config['hum_profiles_csv']
 moz_profiles_csv = config['moz_profiles_csv']
 hum_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", hum_profiles_csv)
 moz_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", moz_profiles_csv)
+hu_allele_freqs_csv = 'output/' + re.sub(".csv", "_allele_freqs.csv", hum_profiles_csv)
 min_noc_csv = 'output/data/min_noc.csv'
-hu_allele_freqs_rds = 'output/' + re.sub(".csv", ".rds", hu_allele_freqs_csv)
+hu_allele_freqs_rds = re.sub(".csv", ".rds", hu_allele_freqs_csv)
 hum_profiles_rds = re.sub("_formatted.csv", ".rds", hum_profiles_formatted)
 outfile = config['outfile']
 kit = config['kit']
-nocs = config['noc']
 threshT = config['threshT']
 difftol = config['difftol']
 threads = config['threads']
@@ -46,6 +45,7 @@ rule format_input_csvs:
   output:
     hum_profiles_formatted,
     moz_profiles_formatted,
+    hu_allele_freqs_csv,
     min_noc_csv
   script:
     'scripts/format_input_csvs.R'
@@ -65,30 +65,29 @@ rule shape_str_data:
     'scripts/shape_str_data.R'
 
 # calculate likelihood ratios (each mosquito gets an output file)
-rule calc_logLR:
+rule calc_log10LR:
   input:
     hu_allele_freqs_rds,
     hum_profiles_rds,
     moz_profiles_formatted,
-    #min_noc_csv,
+    min_noc_csv,
     'output/data/mozzies/{moz_id}_profile.rds'
   params:
     kit=kit,
-    noc=lambda wildcards: wildcards.noc, 
     threshT=threshT,
     difftol=difftol,  
     threads=threads,
     seed=seed,
     time_limit=time_limit
   output:
-    'output/log10LRs_by_mozzie/{moz_id}_noc{noc}_log10LRs.csv'
+    'output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv'
   script:
-    'scripts/calc_logLR.R'
+    'scripts/calc_log10LR.R'
 
 # combine likelihood ratios for all mosquitoes 
 rule combine_output:
   input:
-    expand('output/log10LRs_by_mozzie/{moz_id}_noc{noc}_log10LRs.csv', moz_id=moz_ids, noc=nocs)
+    expand('output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv', moz_id=moz_ids)
   output:
     outfile
   script:

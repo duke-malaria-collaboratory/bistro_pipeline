@@ -2,7 +2,6 @@
 
 # Input file pathnames, change if needed
 # See README for more information on formatting input files
-hu_allele_freqs_csv: 'data/Hu_allele_freq.csv' # Human population allele frequencies; csv required
 hum_profiles_csv: 'data/STR_human_database_long.csv' # human STR profiles; csv required
 moz_profiles_csv: 'data/STR_all_mozzies_long.csv' # mosquito STR profiles; csv required
 
@@ -11,7 +10,6 @@ outfile: 'output/log10LRs.csv' # csv output
 
 # Other parameters
 kit: "GenePrint10" # STR kit name
-noc: [1,2,3] # number of contributors in model
 threshT: 200 # peak detection threshold (all peaks under this threshold are filtered out)
 difftol: 1 # tolerance for difference in log likelihoods across 2 iterations
 threads: 4 # number of threads to use when calculating log10LRs
