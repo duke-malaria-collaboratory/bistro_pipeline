@@ -59,9 +59,10 @@ mozzies %>%
     group_by(SampleName, Marker) %>%
     mutate(peaks = n_distinct(Allele, na.rm = TRUE)) %>%
     group_by(SampleName) %>%
+    mutate(m_locus_count = n_distinct(Marker, na.rm = TRUE)) %>%
     slice_max(peaks) %>%
     mutate(min_noc = ceiling(peaks/2),
            efm_noc = min(min_noc, 3)) %>%
-    select(SampleName, min_noc, efm_noc) %>%
+    select(SampleName, m_locus_count, min_noc, efm_noc) %>%
     unique() %>%  
     write_csv(snakemake@output[[4]])

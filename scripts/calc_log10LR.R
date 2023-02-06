@@ -13,11 +13,18 @@ library(euroformix)
 
 mozzie_ids_all <- read_csv(snakemake@input[[3]]) %>% pull(SampleName) %>% unique()
 
+noc_dat <- read_csv(snakemake@input[[4]]) %>%
+         filter(SampleName == snakemake@wildcards$moz_id)
+m_locus_count <- noc_dat %>% pull(m_locus_count)
+min_noc <- noc_dat %>% pull(min_noc)
+
 # Only run euroformix if mozzie profile has peaks
 if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){ 
   # Write empty file if mozzie profile doesn't have any peaks
   tibble(sample_evidence = snakemake@wildcards$moz_id, 
-         sample_reference = NA, 
+         sample_reference = NA,
+         m_locus_count = m_locus_count, 
+         min_noc = min_noc,
          efm_noc = NA,
          log10LR = NA,
          note = 'No peaks') %>% 
@@ -43,7 +50,9 @@ no_ref_peaks <- sample[[1]] %>%
 if(no_ref_peaks){
   # Write empty file if mozzie profile doesn't have any peaks in ref db
   tibble(sample_evidence = snakemake@wildcards$moz_id,
+         m_locus_count = m_locus_count,
          sample_reference = NA,
+         min_noc = min_noc,
          efm_noc = NA,
          log10LR = NA,
          note = 'No peaks in reference database') %>%
@@ -55,9 +64,7 @@ refData <- read_rds(snakemake@input[[2]])
 numRefs <- length(refData)
 kit <- snakemake@params[[1]]
 #noc <- as.numeric(snakemake@params[[2]])
-efm_noc <- read_csv(snakemake@input[[4]]) %>% 
-         filter(SampleName == snakemake@wildcards$moz_id) %>%
-         pull(efm_noc) 
+efm_noc <- noc_dat %>% pull(efm_noc) 
 threshT <- snakemake@params[[2]]
 difftol <- snakemake@params[[3]]
 threads <- snakemake@params[[4]]
@@ -69,7 +76,7 @@ cat(paste0('Number of references: ', numRefs, '\n'))
 cat(paste0('Calculating log10LRs for each reference\n'))
 
 # Set up df
-LRs_1moz <- tibble(sample_evidence = character(numRefs), sample_reference = NA, efm_noc = efm_noc, log10LR = NA, note = NA)
+LRs_1moz <- tibble(sample_evidence = character(numRefs), m_locus_count = m_locus_count, sample_reference = NA, min_noc = min_noc,  efm_noc = efm_noc, log10LR = NA, note = NA)
 
 # Calcualte logLR for each human
 time_try <- tryCatch({
