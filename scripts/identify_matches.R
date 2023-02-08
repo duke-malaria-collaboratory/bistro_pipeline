@@ -3,9 +3,7 @@
 library(tidyverse)
 
 ###### read data in for one mosquito ######
-lrs <- read_csv("analysis/matching/generated_tables/log10LRs.csv") %>% 
-  filter(sample_evidence == "M07_0575")
-
+lrs <- read_csv(snakemake@input[[1]]) 
 
 
 ###### function to get matches from LRs for 1 mosquito at a given threshold ######
@@ -42,10 +40,9 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
 }
 
 
-
 ##### Screen the log10LR thresholds #####
 
-  #set initial match conditions
+  # set initial match conditions
   
   thresh = 10.5
 
@@ -116,7 +113,7 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
 
 ##### save matches df as a .csv ####
 
-
+matches %>% write_csv(snakemake@output[[1]])
 
 
 
