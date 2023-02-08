@@ -1,6 +1,6 @@
 #################################################
 #                                               #
-#              Combine logLR dfs                #
+#                 Combine dfs                   #
 #                 Once Bitten                   #
 #             C Markwalter & Z Lapp             #
 #                January 2023                   #

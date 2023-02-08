@@ -7,7 +7,8 @@ moz_profiles_csv: 'data/STR_all_mozzies_long.csv' # mosquito STR profiles; csv r
 hum_allele_freqs_csv: None # human population allele frequencies; optional csv. If None, allele frequencies will be calculated using data from hum_profiles_csv.
 
 # Default output file path names 
-outfile: 'output/log10LRs.csv' # csv output
+lr_outfile: 'output/log10LRs.csv' # csv output of log10LRs
+match_outfile: 'output/matches.csv' # csv output of matches
 
 # Other parameters
 kit: "GenePrint10" # STR kit name

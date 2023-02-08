@@ -14,7 +14,7 @@ hum_allele_freqs_csv = config['hum_allele_freqs_csv']
 hum_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", hum_profiles_csv)
 moz_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", moz_profiles_csv)
 min_noc_csv = 'output/data/min_noc.csv'
-hu_allele_freqs_rds = re.sub(".csv", ".rds", hu_allele_freqs_csv)
+hum_allele_freqs_rds = re.sub(".csv", ".rds", hum_allele_freqs_csv)
 hum_profiles_rds = re.sub("_formatted.csv", ".rds", hum_profiles_formatted)
 lr_outfile = config['lr_outfile']
 match_outfile = config['match_outfile']
@@ -74,12 +74,12 @@ rule format_input_csvs:
 # make data in format required for euroformix
 rule shape_str_data:
   input:
-    hu_allele_freqs_csv,
+    hum_allele_freqs_csv,
     hum_profiles_formatted,
     moz_profiles_formatted,
     moz_profiles_csv
   output:
-    hu_allele_freqs_rds,
+    hum_allele_freqs_rds,
     hum_profiles_rds,
     expand('output/data/mozzies/{moz_id}_profile.rds', moz_id=moz_ids)
   script:
@@ -88,7 +88,7 @@ rule shape_str_data:
 # calculate likelihood ratios (each mosquito gets an output file)
 rule calc_log10LR:
   input:
-    hu_allele_freqs_rds,
+    hum_allele_freqs_rds,
     hum_profiles_rds,
     moz_profiles_formatted,
     min_noc_csv,
@@ -108,12 +108,14 @@ rule calc_log10LR:
 # identify matches between mosquitoes and humans
 rule identify_matches:
   input:
-    'output/data/mozzies/{moz_id}_profile.rds'
+    'output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv'
   output:
     'output/matches_by_mozzie/{moz_id}_matches.rds'
+  script:
+    'scripts/identify_matches.R'
 
 # combine likelihood ratios for all mosquitoes 
-rule combine_output:
+rule combine_lr_output:
   input:
     expand('output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv', moz_id=moz_ids)
   output:
@@ -122,7 +124,7 @@ rule combine_output:
     'scripts/combine_output.R'
 
 # combine likelihood ratios for all mosquitoes 
-rule combine_output:
+rule combine_match_output:
   input:
     expand('output/matches_by_mozzie/{moz_id}_matches.csv', moz_id=moz_ids)
   output:
