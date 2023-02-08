@@ -22,4 +22,5 @@ read_csv(snakemake@input[[1]]) %>%
   select(Marker, Allele, freq) %>%
   distinct() %>%
   pivot_wider(names_from = "Marker", values_from = freq) %>%
-  write_csv(snakemake@output[[1]])
+  write_csv(snakemake@output[[1]]) %>%
+  suppressMessages()

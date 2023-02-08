@@ -1,9 +1,9 @@
 
 
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 
 ###### read data in for one mosquito ######
-lrs <- read_csv(snakemake@input[[1]]) 
+lrs <- read_csv(snakemake@input[[1]]) %>% suppressMessages() 
 
 
 ###### function to get matches from LRs for 1 mosquito at a given threshold ######
@@ -28,15 +28,14 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
     # potential matches - less ambiguous
     filter(prefilt_lr_norm >= norm_thresh | !is.na(note)) %>%
     mutate(n_refs_gt_thresh = n_distinct(sample_reference[log10LR > lr_thresh])) %>%
-    mutate(match_dbl = ifelse(n_refs_gt_thresh <= min_noc, 1, log10LR/sum(log10LR)*min_noc),
-           note = case_when(n_refs_gt_thresh <= min_noc & is.na(note) ~ paste0('Passed all filters'),
+    mutate(note = case_when(n_refs_gt_thresh <= min_noc & is.na(note) ~ paste0('Passed all filters'),
                             n_refs_gt_thresh > min_noc & is.na(note) ~ paste0('> min NOC matches'),
                             TRUE ~ note),
            match = case_when(note == 'Passed all filters' ~ 'Yes',
                              note == '> min NOC matches' ~ 'Maybe',
                              TRUE ~ 'No')
     ) %>%
-    select(sample_evidence, min_noc, m_locus_count, match, match_dbl, sample_reference, log10LR, note)
+    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note)
 }
 
 
@@ -47,7 +46,6 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
   thresh = 10.5
 
   matches <- get_matches_1moz(moz_lrs = lrs, lr_thresh = thresh, norm_thresh = 0.5) %>%
-    select(-match_dbl) %>%
     mutate(thresh_low = thresh)
   
   mht <- matches %>%
@@ -63,7 +61,6 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
   # screen thresholds
   while(!identical(mht, mlt)){
     matches <- get_matches_1moz(moz_lrs = lrs, lr_thresh = thresh, norm_thresh = 0.5) %>%
-      select(-match_dbl) %>%
       mutate(thresh_low = thresh)
     
     df <- df %>%

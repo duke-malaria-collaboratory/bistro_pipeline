@@ -11,8 +11,8 @@
 suppressPackageStartupMessages(library(tidyverse))
 
 # Load STR profile data
-humans <- read_csv(snakemake@input[[1]])
-mozzies <- read_csv(snakemake@input[[2]])
+humans <- read_csv(snakemake@input[[1]]) %>% suppressMessages()
+mozzies <- read_csv(snakemake@input[[2]]) %>% suppressMessages()
 threshT <- snakemake@params[[1]]
 
 # Format human data
@@ -34,6 +34,8 @@ hu_string_dups <- hu_allele_strings %>%
   filter(n > 1) %>% 
   pull(all_alleles)
 
+print(paste0('Identified ', length(hu_string_dups), ' human allele profiles that appear more than once (likely twins). These are being removed.'))
+
 hu_formatted %>% 
   left_join(hu_allele_strings) %>% 
   filter(!(all_alleles %in% hu_string_dups)) %>% 
@@ -41,6 +43,9 @@ hu_formatted %>%
   write_csv(snakemake@output[[1]])
 
 # Format mozzie data
+n_under_thresh <- sum(mozzies$Height < threshT, na.rm = TRUE)
+print(paste0('Removing ', n_under_thresh, ' alleles in mosquitoes with peaks under threshT.'))
+
 mozzies %>%
   filter(Height >= threshT) %>%
   group_by(SampleName) %>%

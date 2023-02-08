@@ -11,10 +11,10 @@
 suppressPackageStartupMessages(library(tidyverse))
 library(euroformix)
 
-mozzie_ids_all <- read_csv(snakemake@input[[3]]) %>% pull(SampleName) %>% unique()
+mozzie_ids_all <- read_csv(snakemake@input[[3]]) %>% pull(SampleName) %>% unique() %>% suppressMessages()
 
 noc_dat <- read_csv(snakemake@input[[4]]) %>%
-         filter(SampleName == snakemake@wildcards$moz_id)
+         filter(SampleName == snakemake@wildcards$moz_id) %>% suppressMessages()
 m_locus_count <- noc_dat %>% pull(m_locus_count)
 min_noc <- noc_dat %>% pull(min_noc)
 
@@ -32,8 +32,8 @@ if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){
 }else{
 
 # Read in data
-freq_list <- read_rds(snakemake@input[[1]])
-sample <- read_rds(snakemake@input[[5]])
+freq_list <- read_rds(snakemake@input[[1]]) %>% suppressMessages()
+sample <- read_rds(snakemake@input[[5]]) %>% suppressMessages()
 
 # Don't run euroformix if none of the peaks in the sample are in the reference dataset
 freq_df <- freq_list %>%
@@ -60,7 +60,7 @@ if(no_ref_peaks){
 }else{
 
 # Read in more data and set parameters
-refData <- read_rds(snakemake@input[[2]])
+refData <- read_rds(snakemake@input[[2]]) %>% suppressMessages()
 numRefs <- length(refData)
 kit <- snakemake@params[[1]]
 #noc <- as.numeric(snakemake@params[[2]])

@@ -12,9 +12,9 @@ suppressPackageStartupMessages(library(tidyverse))
 library(euroformix)
 
 # Load STR profile data
-humans <- read_csv(snakemake@input[[2]])
-mozzies <- read_csv(snakemake@input[[3]])
-mozzie_ids_all <- read_csv(snakemake@input[[4]]) %>% pull(SampleName)
+humans <- read_csv(snakemake@input[[2]]) %>% suppressMessages()
+mozzies <- read_csv(snakemake@input[[3]]) %>% suppressMessages()
+mozzie_ids_all <- read_csv(snakemake@input[[4]]) %>% pull(SampleName) %>% suppressMessages()
 
 # Shaping mosquito data
 mozzies_euro <- mozzies %>%

@@ -22,4 +22,5 @@ read_csv(snakemake@input[[1]]) %>%
            efm_noc = min(min_noc, 3)) %>%
     select(SampleName, m_locus_count, min_noc, efm_noc) %>%
     unique() %>%  
-    write_csv(snakemake@output[[1]])
+    write_csv(snakemake@output[[1]]) %>%
+    suppressMessages() 

@@ -38,7 +38,7 @@ rule all:
     match_outfile
 
 # calculate human population allele frequencies if needed
-if hum_allele_freqs_csv is None:
+if hum_allele_freqs_csv == 'None':
   hum_allele_freqs_csv = 'output/' + re.sub(".csv", "_allele_freqs.csv", hum_profiles_csv)
 
   rule get_hum_allele_freqs:
@@ -53,6 +53,8 @@ if hum_allele_freqs_csv is None:
 rule get_min_nocs:
   input:
     moz_profiles_csv
+  params:
+    threshT
   output:
     min_noc_csv
   script:
