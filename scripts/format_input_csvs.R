@@ -39,30 +39,3 @@ mozzies %>%
   pivot_wider(names_from = index, values_from = c(Allele, Height), names_sep = "") %>%
   ungroup() %>%
   write_csv(snakemake@output[[2]])
-
-# Generate human frequency table
-humans %>%
-  distinct() %>% # in case duplicate people
-  group_by(Marker, Allele) %>%
-  mutate(allele_count = n()) %>%
-  group_by(Marker) %>%
-  mutate(locus_n = n()) %>%
-  ungroup() %>%
-  mutate(freq = allele_count/locus_n) %>%
-  select(Marker, Allele, freq) %>%
-  distinct() %>%
-  pivot_wider(names_from = "Marker", values_from = freq) %>%
-  write_csv(snakemake@output[[3]])
-
-# Get minimum number of contributors for each mozzie
-mozzies %>%
-    group_by(SampleName, Marker) %>%
-    mutate(peaks = n_distinct(Allele, na.rm = TRUE)) %>%
-    group_by(SampleName) %>%
-    mutate(m_locus_count = n_distinct(Marker, na.rm = TRUE)) %>%
-    slice_max(peaks) %>%
-    mutate(min_noc = ceiling(peaks/2),
-           efm_noc = min(min_noc, 3)) %>%
-    select(SampleName, m_locus_count, min_noc, efm_noc) %>%
-    unique() %>%  
-    write_csv(snakemake@output[[4]])

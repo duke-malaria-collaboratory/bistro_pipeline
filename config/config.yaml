@@ -4,6 +4,7 @@
 # See README for more information on formatting input files
 hum_profiles_csv: 'data/STR_human_database_long.csv' # human STR profiles; csv required
 moz_profiles_csv: 'data/STR_all_mozzies_long.csv' # mosquito STR profiles; csv required
+hum_allele_freqs_csv: None # human population allele frequencies; optional csv. If None, allele frequencies will be calculated using data from hum_profiles_csv.
 
 # Default output file path names 
 outfile: 'output/log10LRs.csv' # csv output
