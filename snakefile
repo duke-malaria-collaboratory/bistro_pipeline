@@ -110,7 +110,7 @@ rule identify_matches:
   input:
     'output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv'
   output:
-    'output/matches_by_mozzie/{moz_id}_matches.rds'
+    'output/matches_by_mozzie/{moz_id}_matches.csv'
   script:
     'scripts/identify_matches.R'
 
