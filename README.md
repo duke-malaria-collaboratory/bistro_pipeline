@@ -6,7 +6,11 @@ There are 2 input csv files that are required to run the pipeline:
 1. Human STR profiles (the "reference").
 1. Mosquito STR profiles (the "evidence").
 
+It can also optionally take a csv file of the human population allele frequencies. If this file is not included, population allele frequencies will be computed from teh human STR profiles. 
+
 The output is a dataframe of log10LRs for each mosquito-human pair.  
+
+See below for more information about the format of the input and output files. 
 
 ## More information about euroformix
 - Manuscript: [EuroForMix: An open source software based on a continuous model to evaluate STR DNA profiles from a mixture of contributors with artefacts](https://pubmed.ncbi.nlm.nih.gov/26720812/)
@@ -19,26 +23,27 @@ Formats for each dataset required for this pipeline are shown below.
 
 ### Human STR profiles (the "reference")
 
-The human reference STR profiles should be supplied in a .csv file with one row per STR marker for each person. The column headings should be formmated as shown in the example rows below:
+The human reference STR profiles should be supplied in a csv file with one row per allele for each person and marker. The column headings should be formmated as shown in the example rows below:
 
-|SampleName|Marker|Allele1|Allele2|
-|:---:|:---:|:---:|:---:|
-|Person_1|TH01|6|8|
-|Person_1|D21S11|29|30|
-
+|SampleName|Marker|Allele|
+|:---:|:---:|:---:|
+|Person_1|TH01|6|
+|Person_1|TH01|8|
+|Person_1|D21S11|29|
+|Person_1|D21S11|30|
 
 ### Mosquito STR profiles (the "evidence")
 
-The mosquito STR profiles (evidence samples) should be supplied in a .csv file with one rwo per STR marker for each sample. The column headings should be formatted as shown in the example rows below:
+The mosquito STR profiles (evidence samples) should be supplied in a csv file with one row per allele for each mosquito and marker. You must also provide the peak height for each allele. The column headings should be formatted as shown in the example rows below:
 
-|SampleName|Marker|Allele1|Allele2|Allele3|Allele4|...|Height1|Height2|Height3|Height4|...|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|Sample_1|TH01|6|8|9| | |4887|4662|9104| | |
-|Sample_1|D21S11|27|28|30| | |4402|8325|2181| | |
+|SampleName|Marker|Allele|Height|
+|:---:|:---:|:---:|:---:|
+|Sample_1|TH01|6|4887|
+|Sample_1|TH01|9|4662|
 
 ### Population allele frequency (optional)
 
-Population frequencies for each allele at each locus can be supplied in a .csv file. If no csv file is provided, population allele frequencies will be computed from the human STR profiles. 
+Population frequencies for each allele at each locus can be supplied in a csv file. If no csv file is provided, population allele frequencies will be computed from the human STR profiles. 
 
 If you would like to input population allele frequencies, the .csv file should contain one column for each STR marker and one row for each allele. The alleles should be listed in a column titled "Allele". The first two rows of an example table with the loci from the Promega Geneprint10 kit is shown below:
 
