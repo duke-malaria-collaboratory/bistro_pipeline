@@ -31,11 +31,12 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
            note = ifelse(is.na(note), n_refs_gt_min_noc, note),
            match = case_when(note == 'Passed all filters' ~ 'Yes',
                              #note == '> min NOC matches' ~ 'Maybe',
-                             TRUE ~ 'No'),
-           sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
-           log10LR = ifelse(note == '> min NOC matches', NA, log10LR)) %>%
-    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note) %>%
-    distinct() 
+                             TRUE ~ 'No') #,
+           #sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
+           #log10LR = ifelse(note == '> min NOC matches', NA, log10LR)
+          ) %>%
+    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note) #%>%
+    #distinct() 
 }
 
 
@@ -111,7 +112,11 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
 
 ##### save matches df as a .csv ####
 
-matches %>% write_csv(snakemake@output[[1]])
+matches %>% 
+  mutate(sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
+         log10LR = ifelse(note == '> min NOC matches', NA, log10LR)) %>% 
+  distinct() %>% 
+  write_csv(snakemake@output[[1]])
 
 
 
