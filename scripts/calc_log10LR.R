@@ -19,7 +19,7 @@ m_locus_count <- noc_dat %>% pull(m_locus_count)
 min_noc <- noc_dat %>% pull(min_noc)
 
 # Only run euroformix if mozzie profile has peaks
-if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){ 
+if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){
   # Write empty file if mozzie profile doesn't have any peaks
   tibble(sample_evidence = snakemake@wildcards$moz_id, 
          sample_reference = NA,
@@ -27,7 +27,7 @@ if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){
          min_noc = min_noc,
          efm_noc = NA,
          log10LR = NA,
-         note = 'No peaks') %>% 
+         note = 'No peaks') %>%
   write_csv(snakemake@output[[1]])
 }else{
 

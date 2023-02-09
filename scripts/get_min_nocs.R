@@ -12,7 +12,6 @@ suppressPackageStartupMessages(library(tidyverse))
 
 # Get minimum number of contributors for each mozzie
 read_csv(snakemake@input[[1]]) %>%
-    filter(Height >= snakemake@params[[1]]) %>%
     group_by(SampleName, Marker) %>%
     mutate(peaks = n_distinct(Allele, na.rm = TRUE)) %>%
     group_by(SampleName) %>%

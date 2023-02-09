@@ -64,9 +64,7 @@ rule get_min_nocs:
 rule format_input_csvs:
   input:
     hum_profiles_csv,
-    moz_profiles_csv,
-  params: 
-    threshT
+    moz_profiles_csv
   output:
     hum_profiles_formatted,
     moz_profiles_formatted
