@@ -36,6 +36,17 @@ The mosquito STR profiles (evidence samples) should be supplied in a .csv file w
 |Sample_1|TH01|6|8|9| | |4887|4662|9104| | |
 |Sample_1|D21S11|27|28|30| | |4402|8325|2181| | |
 
+### Population allele frequency (optional)
+
+Population frequencies for each allele at each locus can be supplied in a .csv file. If no csv file is provided, population allele frequencies will be computed from the human STR profiles. 
+
+If you would like to input population allele frequencies, the .csv file should contain one column for each STR marker and one row for each allele. The alleles should be listed in a column titled "Allele". The first two rows of an example table with the loci from the Promega Geneprint10 kit is shown below:
+
+| Allele | TH01 | D21S11 | D5S818 | D13S317 | D7S820 | D16S539 | CSF1PO | AMEL | vWA | TPOX |
+|:------:|:----:|:------:|:------:|:-------:|:------:|:------:|:----:|:---:|:----:|:---:|
+|6|0.206957| | | | | | | | |0.098276|
+|8|0.250435| |0.06117|0.021053|0.187716|0.033304|0.042205| | |0.24569|
+
 
 ## Installing euroformix
 
