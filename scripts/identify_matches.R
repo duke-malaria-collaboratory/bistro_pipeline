@@ -26,15 +26,16 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
     distinct() %>%
     # potential matches - less ambiguous
     filter(prefilt_lr_norm >= norm_thresh | !is.na(note)) %>%
-    #data.frame() %>% sapply(., class) %>% print()
     mutate(n_refs_gt_thresh = n_distinct(sample_reference[log10LR > lr_thresh]),
            n_refs_gt_min_noc = ifelse(n_refs_gt_thresh > min_noc, '> min NOC matches', 'Passed all filters'),
            note = ifelse(is.na(note), n_refs_gt_min_noc, note),
            match = case_when(note == 'Passed all filters' ~ 'Yes',
-                             note == '> min NOC matches' ~ 'Maybe',
-                             TRUE ~ 'No')
-    ) %>%
-    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note)
+                             #note == '> min NOC matches' ~ 'Maybe',
+                             TRUE ~ 'No'),
+           sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
+           log10LR = ifelse(note == '> min NOC matches', NA, log10LR)) %>%
+    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note) %>%
+    distinct() 
 }
 
 
@@ -83,7 +84,7 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
     
   }
    
-  if(nrow(matches) < matches$min_noc[1]){
+  if(nrow(matches) != matches$min_noc[1]){
   
     temp <- df %>%
       group_by(thresh_low) %>%
@@ -105,6 +106,7 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
     }
       
   }
+
 
 
 ##### save matches df as a .csv ####
