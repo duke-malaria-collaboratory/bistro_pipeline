@@ -17,6 +17,7 @@ mozzies <- read_csv(snakemake@input[[2]]) %>% suppressMessages()
 # Format human data
 hu_formatted <- humans %>%
   distinct() %>% # in case duplicate people
+  arrange(SampleName, Marker, Allele) %>% 
   group_by(SampleName, Marker) %>%
   mutate(index = row_number()) %>%
   pivot_wider(names_from = index, values_from = Allele, names_prefix = "Allele") %>%
