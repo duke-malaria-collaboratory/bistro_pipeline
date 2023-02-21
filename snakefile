@@ -1,4 +1,4 @@
-# snakefile to run euroformix
+# snakefile to run BISTRO
 
 # imports
 import re
