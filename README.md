@@ -1,6 +1,6 @@
-# Snakemake pipeline to identify matches between mosquitoes and the people they bit 
+# BISTRO: Blood meal Identification by STR Overlap
 
-This snakemake pipeline identifies matches between mosquitoes (the "evidence") and humans (the "reference") using short tandem repeat (STR) profiles of human blood from freshly fed mosquitoes and from people.
+This snakemake pipeline identifies matches between mosquitoes (the "evidence") and the people they bit (the "reference") using short tandem repeat (STR) profiles of human blood from freshly fed mosquitoes and from people.
 
 Inputs:
 1. Human STR profiles (the "reference")
