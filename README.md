@@ -73,19 +73,19 @@ bash Miniconda3-latest-MacOSX-x86_64.sh
 
 Next, run these commands to download and install the pipeline and the euroformix R package (you only have to do all this once):
 ```
-git clone https://github.com/duke-malaria-collaboratory/run_euroformix.git # download this GitHub repository
-cd run_euroformix # move into the run_euroformix directory
-mamba env create -f config/environment/euroformix.yaml # create the euroformix conda environment
-conda activate euroformix # activate the euroformix conda environment
+git clone https://github.com/duke-malaria-collaboratory/bistro.git # download this GitHub repository
+cd bistro # move into the bistro directory
+mamba env create -f config/environment/bistro.yaml # create the bistro conda environment
+conda activate bistro # activate the bistro conda environment
 Rscript -e "devtools::install_github('https://github.com/oyvble/euroformix.git')" # install euroformix in environment
 ```
 
 Note that you will have to activate the conda environment each time you open a new terminal:
 ```
-conda activate euroformix
+conda activate bistro
 ```
 
-## Using the euroformix snakemake pipeline
+## Using the bistro snakemake pipeline
 
 To run the pipeline on the cluster, you have to modify the following files:
 - `scripts/submit_slurm.sbat` (email address)
@@ -94,7 +94,7 @@ To run the pipeline on the cluster, you have to modify the following files:
 
 To check to see if everything is working okay, first do a "dry-run":
 ```
-conda activate euroformix # be sure you've activated the environment! 
+conda activate bistro # be sure you've activated the environment! 
 snakemake -n # dry-run
 ```
 
