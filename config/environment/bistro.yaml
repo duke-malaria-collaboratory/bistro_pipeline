@@ -1,4 +1,4 @@
-name: euroformix
+name: bistro
 channels:
   - conda-forge
   - bioconda
