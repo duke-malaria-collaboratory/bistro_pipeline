@@ -105,6 +105,10 @@ sbatch scripts/submit_slurm.sbat # submit the job to the cluster
 
 See below for more information on snakemake.
 
+### Selecting the STR genotyping kit
+
+The `contLikSearch()` function from the `euroformix` package requires an STR genotyping `kit` argument, which can be set in `config/config.yaml`. `euroformix` already has kit parameters for 23 common STR genotyping kits. To find a list of available kits, use the `getKit()` function after loading `euroformix`. We have additionally added parameters for the Promega GenePrint10 System, which is the default kit in `config.yaml` for this pipeline. If the kit you used to genotype samples is not available in the defaults, please modify `kit.txt` (filepath: `euroformix/extdata/kit.txt`) within the `euroformix` package in the conda environment with the appropriate kit parameters. The required parameters can usually be found on the kit manufacturer's documentation and/or website.
+
 ## Output files
 
 The main output is a csv file containing which humans matched to each mosquito. By default, this output is stored in `output/matches.csv`. Here is an example output:
