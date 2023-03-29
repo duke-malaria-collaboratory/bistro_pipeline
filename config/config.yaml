@@ -2,18 +2,18 @@
 
 # Input file pathnames, change if needed
 # See README for more information on formatting input files
-hum_profiles_csv: 'data/STR_human_database_long.csv' # human STR profiles; csv required
-moz_profiles_csv: 'data/STR_all_mozzies_long.csv' # mosquito STR profiles; csv required
-hum_allele_freqs_csv: None # human population allele frequencies; optional csv. If None, allele frequencies will be calculated using data from hum_profiles_csv.
+hum_profiles_csv: 'example_data/bistro_input/reference_database.csv' # human STR profiles; csv required
+moz_profiles_csv: 'example_data/bistro_input/evidence.csv' # mosquito STR profiles; csv required
+hum_allele_freqs_csv: 'example_data/bistro_input/allele_freqs.csv' # human population allele frequencies; optional csv. If None, allele frequencies will be calculated using data from hum_profiles_csv.
 
 # Default output file path names 
 lr_outfile: 'output/log10LRs.csv' # csv output of log10LRs
 match_outfile: 'output/matches.csv' # csv output of matches
 
 # Other parameters
-kit: "GenePrint10" # STR kit name
+kit: "ESX17" # STR kit name
 threshT: 200 # peak detection threshold (all peaks under this threshold are filtered out)
-difftol: 1 # tolerance for difference in log likelihoods across 2 iterations
+difftol: 0.01 # tolerance for difference in log likelihoods across 2 iterations
 threads: 4 # number of threads to use when calculating log10LRs
 seed: 1 # seed when calculating log10LRs
 time_limit: 24 # time limit in hours to run euroformix on 1 mozzie. note that if you want to run it for more than 2 days, you'll have to change the config/slurm/cluster.yaml file as well

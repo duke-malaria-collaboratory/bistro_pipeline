@@ -1,8 +1,8 @@
 #!/bin/sh
 # Job name
-#SBATCH --job-name=euroformix
+#SBATCH --job-name=bistro
 # User info
-#SBATCH --mail-user=zl338@duke.edu
+#SBATCH --mail-user=YOUR_EMAIL_HERE
 #SBATCH --mail-type=END,FAIL
 #SBATCH --export=ALL
 # Number of cores, amount of memory, and walltime

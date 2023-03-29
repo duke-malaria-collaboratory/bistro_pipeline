@@ -5,7 +5,6 @@ __default__:
   cpuspertask: 1
   mempercpu: "1gb"
   time: "24:00:00"
-  #partition: "standard"
   mailuser: "EMAIL" # ENTER EMAIL BETWEEN QUOTES
   mailtype: "NONE"
   output: "logs/%x-%j.out"
