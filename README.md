@@ -27,13 +27,61 @@ The core of the pipeline is the [`contLikSearch()`](https://github.com/oyvble/eu
 - [GitHub](https://github.com/oyvble/euroformix)
 - [Website that explains GUI](http://www.euroformix.com/)
 
+## Install dependencies
+
+First, [download miniconda](https://docs.conda.io/en/latest/miniconda.html) for linux if you don't already have it:
+```
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-MacOSX-x86_64.sh
+```
+
+Next, run these commands to download and install the pipeline and the euroformix R package (you only have to do all this once):
+```
+git clone https://github.com/duke-malaria-collaboratory/bistro.git # download this GitHub repository
+cd bistro # move into the bistro directory
+mamba env create -f config/environment/bistro.yaml # create the bistro conda environment
+conda activate bistro # activate the bistro conda environment
+Rscript -e "devtools::install_github('https://github.com/oyvble/euroformix.git')" # install euroformix in environment
+```
+
+Note that you will have to activate the conda environment each time you open a new terminal:
+```
+conda activate bistro
+```
+
+## Run the pipeline
+
+To run the pipeline on the cluster, you have to modify the following files:
+- `scripts/submit_slurm.sbat` (email address)
+- `config/slurm/cluster.yaml` (email address)
+- `config/config.yaml` (paths to input data; other parameters such as the kit if needed)
+
+We have provided example data so you can test to see if everything is working. 
+To run the example data, you don't have to modify the config file. 
+However, you should include your email address in the two scripts listed above. 
+
+First, check to see if everything is working okay by doing a "dry-run":
+
+```
+conda activate bistro # be sure you've activated the environment! 
+snakemake -n # dry-run
+```
+
+If this runs successfully, then run:
+
+```
+sbatch scripts/submit_slurm.sbat # submit the job to the cluster
+```
+
+See below for more information on how to format your data to input to the pipeline, and on how to use snakemake.
+
 ## Data requirements
 
 Formats for each dataset required for this pipeline are shown below.
 
 ### Human STR profiles (the "reference")
 
-The human reference STR profiles should be supplied in a csv file with one row per allele for each person and marker. The column headings should be formmated as shown in the example rows below:
+The human reference STR profiles should be supplied in a csv file with one row per allele for each person and marker. The column headings should be formatted as shown in the example rows below:
 
 |SampleName|Marker|Allele|
 |:---:|:---:|:---:|
@@ -63,51 +111,9 @@ If you would like to input population allele frequencies, the csv file should co
 |8|0.250435| |0.06117|0.021053|0.187716|0.033304|0.042205| | |0.24569|
 
 
-## Installing dependencies
-
-First, [download miniconda](https://docs.conda.io/en/latest/miniconda.html) for linux if you don't already have it:
-```
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-MacOSX-x86_64.sh
-```
-
-Next, run these commands to download and install the pipeline and the euroformix R package (you only have to do all this once):
-```
-git clone https://github.com/duke-malaria-collaboratory/bistro.git # download this GitHub repository
-cd bistro # move into the bistro directory
-mamba env create -f config/environment/bistro.yaml # create the bistro conda environment
-conda activate bistro # activate the bistro conda environment
-Rscript -e "devtools::install_github('https://github.com/oyvble/euroformix.git')" # install euroformix in environment
-```
-
-Note that you will have to activate the conda environment each time you open a new terminal:
-```
-conda activate bistro
-```
-
-## Using the bistro snakemake pipeline
-
-To run the pipeline on the cluster, you have to modify the following files:
-- `scripts/submit_slurm.sbat` (email address)
-- `config/slurm/cluster.yaml` (email address)
-- `config/config.yaml` (paths to input data; other parameters such as the kit if needed)
-
-To check to see if everything is working okay, first do a "dry-run":
-```
-conda activate bistro # be sure you've activated the environment! 
-snakemake -n # dry-run
-```
-
-If this runs successfully, then run:
-```
-sbatch scripts/submit_slurm.sbat # submit the job to the cluster
-```
-
-See below for more information on snakemake.
-
 ### Selecting the STR genotyping kit
 
-The `contLikSearch()` function from the `euroformix` package requires an STR genotyping `kit` argument, which can be set in `config/config.yaml`. `euroformix` already has kit parameters for 23 common STR genotyping kits. To find a list of available kits, use the `getKit()` function after loading `euroformix`. We have additionally added parameters for the Promega GenePrint10 System, which is the default kit in `config.yaml` for this pipeline. If the kit you used to genotype samples is not available in the defaults, please modify `kit.txt` (filepath: `euroformix/extdata/kit.txt`) within the `euroformix` package in the conda environment with the appropriate kit parameters. The required parameters can usually be found on the kit manufacturer's documentation and/or website.
+The `contLikSearch()` function from the `euroformix` package requires an STR genotyping `kit` argument, which can be set in `config/config.yaml`. `euroformix` already has kit parameters for 23 common STR genotyping kits. To find a list of available kits, use the `getKit()` function after loading `euroformix`. We have additionally added parameters for the Promega GenePrint10 System (kit name: GenePrint10) for this pipeline. If the kit you used to genotype samples is not available in the defaults, please modify `kit.txt` (filepath: `euroformix/extdata/kit.txt`) within the `euroformix` package in the conda environment with the appropriate kit parameters. The required parameters can usually be found on the kit manufacturer's documentation and/or website.
 
 ## Output files
 
@@ -132,7 +138,7 @@ The other main output file is a csv file containing the log10LR for each mosquit
 
 Intermediate data files generated by the pipeline include formatted input files, a file with human population allele frequencies (if calculated from the human STR profiles), rds files with the data shaped in the format required for `euroformix`, and log10LR and match files for each individual mosquito. 
 
-## Learning more about snakemake
+## Learn more about snakemake
 
 Benefits of snakemake:
 - Your analysis is reproducible.
