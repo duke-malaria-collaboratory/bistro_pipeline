@@ -7,5 +7,4 @@ channels:
 dependencies:
   - r-tidyverse
   - r-devtools
-  - r-codetools
   - snakemake
