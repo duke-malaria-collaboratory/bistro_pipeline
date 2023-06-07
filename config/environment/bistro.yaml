@@ -7,7 +7,5 @@ channels:
 dependencies:
   - r-tidyverse
   - r-devtools
-  - r-plotly
   - r-codetools
-  - r-cubature
   - snakemake
