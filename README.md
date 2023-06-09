@@ -1,15 +1,15 @@
 # BISTRO: Blood meal Identification by STR Overlap
 
-This snakemake pipeline identifies matches between mosquitoes (the "evidence") and the people they bit (the "reference") using short tandem repeat (STR) profiles of human blood from freshly fed mosquitoes and from people. Note that you can use it for other matching purposes as well (not just matching mosquito blood meals with the people they bit). 
+This snakemake pipeline identifies matches between bloodmeals (the "evidence") and the people they bit (the "reference") using short tandem repeat (STR) profiles of human blood from freshly fed bloodmeals and from people. Note that you can use it for other matching purposes as well (not just matching bloodmeal blood meals with the people they bit). 
 
 Inputs:
 1. Human STR profiles (the "reference")
-1. Mosquito STR profiles (the "evidence")
+1. Bloodmeal STR profiles (the "evidence")
 1. Human population allele frequencies (optional)
 
 Outputs:
-1. log10LRs for each mosquito-human pair
-1. Human matches for each mosquito
+1. log10LRs for each bloodmeal-human pair
+1. Human matches for each bloodmeal
 
 See below for more information about the format of the input and output files. 
 
@@ -17,10 +17,10 @@ See below for more information about the format of the input and output files.
 
 The pipline executes the following steps:
 1. If no human population allele frequencies are provided, calculates these frequencies from the human STR profiles. 
-1. Removes STR profiles from the human database that occur more than once (likely twins). These are not used to identify mosquito-human pairs because matches with these people cannot be resolved. 
-1. Estimates the number of contributors (NOC) for each mosquito based on the maximum number of distinct alleles identified at a given locus: ceiling(max(number of alleles)/2). This is the minimum NOC. 
-1. Calculates log10 likelihood ratios (log10LRs) for each mosquito-human pair using the `contLikSearch` function from `euroformix`. Degradation is modeled, but forward and backward stutter are not. The numerator of the log10LR is the likelihood that the person was bitten by the mosquito and the denominator is the likelihood that someone else was bitten by the mosquito. 
-1. Uses the log10LRs and estimated NOCs to identify likely human contributors for each mosquito. 
+1. Removes STR profiles from the human database that occur more than once (likely twins). These are not used to identify bloodmeal-human pairs because matches with these people cannot be resolved. 
+1. Estimates the number of contributors (NOC) for each bloodmeal based on the maximum number of distinct alleles identified at a given locus: ceiling(max(number of alleles)/2). This is the minimum NOC. 
+1. Calculates log10 likelihood ratios (log10LRs) for each bloodmeal-human pair using the `contLikSearch` function from `euroformix`. Degradation is modeled, but forward and backward stutter are not. The numerator of the log10LR is the likelihood that the person was bitten by the bloodmeal and the denominator is the likelihood that someone else was bitten by the bloodmeal. 
+1. Uses the log10LRs and estimated NOCs to identify likely human contributors for each bloodmeal. 
 
 The core of the pipeline is the [`contLikSearch()`](https://github.com/oyvble/euroformix/blob/master/R/contLikSearch.R) function from the `euroformix` package. Here is more information about euroformix: 
 - Manuscript: [EuroForMix: An open source software based on a continuous model to evaluate STR DNA profiles from a mixture of contributors with artefacts](https://pubmed.ncbi.nlm.nih.gov/26720812/)
@@ -52,13 +52,18 @@ conda activate bistro
 ## Run the pipeline
 
 To run the pipeline on the cluster, you have to modify the following files:
-- `scripts/submit_slurm.sbat` (email address)
+- `submit_slurm.sbat` (email address)
 - `config/slurm/cluster.yaml` (email address)
 - `config/config.yaml` (paths to input data; other parameters such as the kit if needed)
 
 We have provided example data so you can test to see if everything is working. 
 To run the example data, you don't have to modify the config file. 
 However, you should include your email address in the two scripts listed above. 
+
+The data can be anywhere on the computer you're using, as long as you put the correct path 
+(absolute path, or relative path from the bistro directory). 
+One option is to move the data to a directory inside the bistro directory. 
+In that case, you just have to put the name of the folder. 
 
 First, check to see if everything is working okay by doing a "dry-run":
 
@@ -70,7 +75,7 @@ snakemake -n # dry-run
 If this runs successfully, then run:
 
 ```
-sbatch scripts/submit_slurm.sbat # submit the job to the cluster
+sbatch submit_slurm.sbat # submit the job to the cluster
 ```
 
 See below for more information on how to format your data to input to the pipeline, and on how to use snakemake.
@@ -81,7 +86,7 @@ Formats for each dataset required for this pipeline are shown below.
 
 ### Human STR profiles (the "reference")
 
-The human reference STR profiles should be supplied in a csv file with one row per allele for each person and marker. The column headings should be formatted as shown in the example rows below:
+The human reference STR profiles should be supplied in a csv file with one row per allele for each person and marker. Homozygous markers should only be included once (i.e. as one row). The column headings should be formatted as shown in the example rows below:
 
 |SampleName|Marker|Allele|
 |:---:|:---:|:---:|
@@ -90,9 +95,9 @@ The human reference STR profiles should be supplied in a csv file with one row p
 |Person_1|D21S11|29|
 |Person_1|D21S11|30|
 
-### Mosquito STR profiles (the "evidence")
+### Bloodmeal STR profiles (the "evidence")
 
-The mosquito STR profiles (evidence samples) should be supplied in a csv file with one row per allele for each mosquito and marker. You must also provide the peak height for each allele. The column headings should be formatted as shown in the example rows below:
+The bloodmeal STR profiles (evidence samples) should be supplied in a csv file with one row per allele for each bloodmeal and marker. You must also provide the peak height for each allele. The column headings should be formatted as shown in the example rows below:
 
 |SampleName|Marker|Allele|Height|
 |:---:|:---:|:---:|:---:|
@@ -117,7 +122,7 @@ The `contLikSearch()` function from the `euroformix` package requires an STR gen
 
 ## Output files
 
-The main output is a csv file containing which humans matched to each mosquito. By default, this output is stored in `output/matches.csv`. Here is an example output:
+The main output is a csv file containing which humans matched to each bloodmeal. By default, this output is stored in `output/matches.csv`. Here is an example output:
 
 |sample_evidence|min_noc|m_locus_count|match|sample_reference|log10LR|note|thresh_low|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -125,18 +130,18 @@ The main output is a csv file containing which humans matched to each mosquito. 
 |Sample_2|1|10|Yes|Person_1|10.91|Passed all filters|10|
 
 The columns contain:
-- `sample_evidence`: mosquito sample ("evidence")
-- `min_noc`: minimum NOC of the mosquito sample
-- `m_locus_count`: number of loci STR-typed in the mosquito
-- `match`: whether the mosquito STR profile matched to a human in the database
-- `sample_reference`: human match for the mosquito
-- `log10LR`: log10LR of the mosquito-human match
-- `note`: why the mosquito does or doesn't have a match
+- `sample_evidence`: bloodmeal sample ("evidence")
+- `min_noc`: minimum NOC of the bloodmeal sample
+- `m_locus_count`: number of loci STR-typed in the bloodmeal
+- `match`: whether the bloodmeal STR profile matched to a human in the database
+- `sample_reference`: human match for the bloodmeal
+- `log10LR`: log10LR of the bloodmeal-human match
+- `note`: why the bloodmeal does or doesn't have a match
 - `thresh_low`: log10LR threshold at which the match was made
 
-The other main output file is a csv file containing the log10LR for each mosquito-human pair that can be used to investigate why matches were or were not called for a specific mosquito. By default, this output is stored in `output/log10LRs.csv`. The numerator of the log10LR is the likelihood that the person was bitten by the mosquito and the denominator is the likelihood that someone else was bitten by the mosquito. 
+The other main output file is a csv file containing the log10LR for each bloodmeal-human pair that can be used to investigate why matches were or were not called for a specific bloodmeal. By default, this output is stored in `output/log10LRs.csv`. The numerator of the log10LR is the likelihood that the person was bitten by the bloodmeal and the denominator is the likelihood that someone else was bitten by the bloodmeal. 
 
-Intermediate data files generated by the pipeline include formatted input files, a file with human population allele frequencies (if calculated from the human STR profiles), rds files with the data shaped in the format required for `euroformix`, and log10LR and match files for each individual mosquito. 
+Intermediate data files generated by the pipeline include formatted input files, a file with human population allele frequencies (if calculated from the human STR profiles), rds files with the data shaped in the format required for `euroformix`, and log10LR and match files for each individual bloodmeal. 
 
 ## Learn more about snakemake
 
