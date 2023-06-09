@@ -126,7 +126,7 @@ rule combine_lr_output:
 # combine likelihood ratios for all bloodmeals 
 rule combine_match_output:
   input:
-    expand('output/matches_by_bloodmeals/{moz_id}_matches.csv', moz_id=moz_ids)
+    expand('output/matches_by_bloodmeal/{moz_id}_matches.csv', moz_id=moz_ids)
   output:
     match_outfile
   script:
