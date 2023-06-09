@@ -24,11 +24,11 @@ mozzies_euro <- mozzies %>%
 # Saving a separate rds file for each mozzie
 for(i in mozzie_ids_all[!mozzie_ids_all %in% mozzies$SampleName]){
   # Write empty file if mozzie profile doesn't have any peaks
-  file.create(paste0("output/data/mozzies/", i, "_profile.rds"))
+  file.create(paste0("output/data/bloodmeals/", i, "_profile.rds"))
 }
 
 for(i in 1:length(mozzies_euro)){
-  write_rds(mozzies_euro[i], paste0("output/data/mozzies/", names(mozzies_euro)[i], "_profile.rds")) # change file path to be parameter
+  write_rds(mozzies_euro[i], paste0("output/data/bloodmeals/", names(mozzies_euro)[i], "_profile.rds")) # change file path to be parameter
 }
 
 # Shaping human data
