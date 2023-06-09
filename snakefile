@@ -9,7 +9,7 @@ configfile: "config/config.yaml"
 
 # get paths
 hum_profiles_csv = config['hum_profiles_csv']
-moz_profiles_csv = config['moz_profiles_csv']
+moz_profiles_csv = config['bm_profiles_csv']
 hum_allele_freqs_csv = config['hum_allele_freqs_csv']
 hum_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", hum_profiles_csv)
 moz_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", moz_profiles_csv)
@@ -81,18 +81,18 @@ rule shape_str_data:
   output:
     hum_allele_freqs_rds,
     hum_profiles_rds,
-    expand('output/data/mozzies/{moz_id}_profile.rds', moz_id=moz_ids)
+    expand('output/data/bloodmeals/{moz_id}_profile.rds', moz_id=moz_ids)
   script:
     'scripts/shape_str_data.R'
 
-# calculate likelihood ratios (each mosquito gets an output file)
+# calculate likelihood ratios (each bloodmeal gets an output file)
 rule calc_log10LR:
   input:
     hum_allele_freqs_rds,
     hum_profiles_rds,
     moz_profiles_formatted,
     min_noc_csv,
-    'output/data/mozzies/{moz_id}_profile.rds'
+    'output/data/bloodmeals/{moz_id}_profile.rds'
   params:
     kit=kit,
     threshT=threshT,
@@ -101,32 +101,32 @@ rule calc_log10LR:
     seed=seed,
     time_limit=time_limit
   output:
-    'output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv'
+    'output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv'
   script:
     'scripts/calc_log10LR.R'
 
-# identify matches between mosquitoes and humans
+# identify matches between bloodmeals and humans
 rule identify_matches:
   input:
-    'output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv'
+    'output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv'
   output:
-    'output/matches_by_mozzie/{moz_id}_matches.csv'
+    'output/matches_by_bloodmeal/{moz_id}_matches.csv'
   script:
     'scripts/identify_matches.R'
 
-# combine likelihood ratios for all mosquitoes 
+# combine likelihood ratios for all bloodmeals 
 rule combine_lr_output:
   input:
-    expand('output/log10LRs_by_mozzie/{moz_id}_log10LRs.csv', moz_id=moz_ids)
+    expand('output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv', moz_id=moz_ids)
   output:
     lr_outfile
   script:
     'scripts/combine_output.R'
 
-# combine likelihood ratios for all mosquitoes 
+# combine likelihood ratios for all bloodmeals 
 rule combine_match_output:
   input:
-    expand('output/matches_by_mozzie/{moz_id}_matches.csv', moz_id=moz_ids)
+    expand('output/matches_by_bloodmeals/{moz_id}_matches.csv', moz_id=moz_ids)
   output:
     match_outfile
   script:
