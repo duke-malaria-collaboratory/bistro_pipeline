@@ -69,7 +69,7 @@ threshT <- snakemake@params[[2]]
 difftol <- snakemake@params[[3]]
 threads <- snakemake@params[[4]]
 seed <- snakemake@params[[5]]
-time_limit <- snakemake@params[[6]] # in hours
+time_limit <- snakemake@params[[6]] # in seconds
 
 cat(paste0('NOC: ', efm_noc, '\n'))
 cat(paste0('Number of references: ', numRefs, '\n'))
@@ -81,7 +81,7 @@ LRs_1moz <- tibble(sample_evidence = character(numRefs), m_locus_count = m_locus
 # Calcualte logLR for each human
 time_try <- tryCatch({
 {
-setTimeLimit(60*60*time_limit) # in seconds
+setTimeLimit(time_limit) # in seconds
 for(i in 1:numRefs){
   print(i)  
   out <- tryCatch({output <- contLikSearch(NOC=efm_noc, modelDegrad=TRUE, modelBWstutt=FALSE, modelFWstutt=FALSE, samples=sample, popFreq=freq_list, refData=refData, condOrder=rep(0,length(refData)), knownRefPOI=i, prC=0.05, threshT=threshT, lambda=0.01, kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)

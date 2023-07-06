@@ -12,7 +12,7 @@ suppressPackageStartupMessages(library(tidyverse))
 
 # Load STR profile data
 humans <- read_csv(snakemake@input[[1]]) %>% suppressMessages()
-mozzies <- read_csv(snakemake@input[[2]]) %>% suppressMessages()
+mozzies <- read_csv(snakemake@input[[2]]) %>% filter(Height >= snakemake@params[[1]]) %>% suppressMessages()
 
 # Format human data
 hu_formatted <- humans %>%
