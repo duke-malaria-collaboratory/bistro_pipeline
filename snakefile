@@ -11,11 +11,11 @@ configfile: "config/config.yaml"
 hum_profiles_csv = config['hum_profiles_csv']
 moz_profiles_csv = config['bm_profiles_csv']
 hum_allele_freqs_csv = config['hum_allele_freqs_csv']
-hum_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", hum_profiles_csv)
-moz_profiles_formatted = 'output/' + re.sub(".csv", "_formatted.csv", moz_profiles_csv)
+hum_profiles_formatted = 'output/data/' + re.sub('.csv', '_formatted.csv', re.sub('.*/', '', hum_profiles_csv))
+moz_profiles_formatted = 'output/data/' + re.sub('.csv', '_formatted.csv', re.sub('.*/', '', moz_profiles_csv))
 min_noc_csv = 'output/data/min_noc.csv'
-hum_allele_freqs_rds = re.sub(".csv", ".rds", hum_allele_freqs_csv)
-hum_profiles_rds = re.sub("_formatted.csv", ".rds", hum_profiles_formatted)
+hum_allele_freqs_rds = 'output/data/' + re.sub('.csv', '.rds', re.sub('.*/', '', hum_allele_freqs_csv))
+hum_profiles_rds = re.sub('_formatted.csv', '_formatted.rds', hum_profiles_formatted)
 lr_outfile = config['lr_outfile']
 match_outfile = config['match_outfile']
 kit = config['kit']
@@ -65,6 +65,8 @@ rule format_input_csvs:
   input:
     hum_profiles_csv,
     moz_profiles_csv
+  params:
+    threshT
   output:
     hum_profiles_formatted,
     moz_profiles_formatted
