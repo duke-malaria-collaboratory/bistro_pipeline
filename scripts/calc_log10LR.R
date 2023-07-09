@@ -84,7 +84,7 @@ time_try <- tryCatch({
 setTimeLimit(time_limit) # in seconds
 for(i in 1:numRefs){
   print(i)  
-  out <- tryCatch({output <- contLikSearch(NOC=efm_noc, modelDegrad=TRUE, modelBWstutt=FALSE, modelFWstutt=FALSE, samples=sample, popFreq=freq_list, refData=refData, condOrder=rep(0,length(refData)), knownRefPOI=i, prC=0.05, threshT=threshT, lambda=0.01, kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
+  out <- tryCatch({output <- contLikSearch(NOC=efm_noc, modelDegrad=as.logical(snakemake@params[[7]], modelBWstutt=as.logical(snakemake@params[[8]]), modelFWstutt=as.logical(snakemake@params[[9]]), samples=sample, popFreq=freq_list, refData=refData, condOrder=rep(0,length(refData)), knownRefPOI=i, prC=0.05, threshT=threshT, lambda=0.01, kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
     output$outtable[3]
     },
     error = function(cond) return('euroformix error')

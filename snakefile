@@ -24,6 +24,9 @@ difftol = config['difftol']
 threads = config['threads']
 seed = config['seed']
 time_limit = config['time_limit']
+modelDegrad = config['modelDegrad']
+modelBWstutt = config['modelBWstutt']
+modelFWstutt = config['modelFWstutt']
 
 # get mozzie ids
 with open(moz_profiles_csv) as f:
@@ -101,7 +104,10 @@ rule calc_log10LR:
     difftol=difftol,  
     threads=threads,
     seed=seed,
-    time_limit=time_limit
+    time_limit=time_limit,
+    modelDegrad=modelDegrad,
+    modelBWstutt=modelBWstutt,
+    modelFWstutt=modelFWstutt
   output:
     'output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv'
   script:
