@@ -12,7 +12,7 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(euroformix))
 
-mozzie_ids_all <- read_csv(snakemake@input[[3]]) %>% pull(SampleName) %>% unique() %>% suppressMessages()
+mozzie_ids_all <- read_csv(snakemake@input[[3]], col_types = 'c') %>% pull(SampleName) %>% unique() %>% suppressMessages()
 
 noc_dat <- read_csv(snakemake@input[[4]]) %>%
          filter(SampleName == snakemake@wildcards$moz_id) %>% suppressMessages()
