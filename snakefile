@@ -42,7 +42,7 @@ rule all:
 
 # calculate human population allele frequencies if needed
 if hum_allele_freqs_csv == 'None':
-  hum_allele_freqs_csv = 'output/' + re.sub(".csv", "_allele_freqs.csv", hum_profiles_csv)
+  hum_allele_freqs_csv = 'output/data/' + re.sub(".csv", "_allele_freqs.csv", re.sub('.*/', '', hum_profiles_csv))
 
   rule get_hum_allele_freqs:
     input:

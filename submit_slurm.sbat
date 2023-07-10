@@ -10,5 +10,5 @@
 #SBATCH -o logs/slurm-%j_%x.out # File for STDOUT (with jobid = %j)
 
 # Job commands
-snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml
+snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml --stats output/stats
 #snakemake --latency-wait 20 --profile config/slurm -s snakefile --configfile config/config.yaml --rerun-triggers mtime
