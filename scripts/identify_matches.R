@@ -8,7 +8,9 @@ lrs <- read_csv(snakemake@input[[1]]) %>% suppressMessages()
 ###### function to get matches from LRs for 1 mosquito at a given threshold ######
 
 get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
-  moz_lrs %>% 
+  moz_lrs %>%
+    #remove euroformix and time-out errors
+    filter(!note %in% c("euroformix error", "timed out") | is.na(note)) %>% 
     # non-matches
     mutate(all_bad = all(log10LR < lr_thresh | is.na(log10LR) | is.infinite(log10LR)),
            note = ifelse(all_bad & is.na(note), 'All log10LR < thresh', note),
