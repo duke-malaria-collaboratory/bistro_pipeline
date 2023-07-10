@@ -41,10 +41,13 @@ write_csv(evidence, file = "../example_data/bistro_input/evidence.csv")
 # Reference
 
 reference <- read_delim("../example_data/from_euroformix/databaseESX17.txt") %>%
+  bind_rows(read_csv("../example_data/from_euroformix/refs.csv") %>%
+              rename(`Allele 1` = Allele1, `Allele 2` = Allele2, `Sample Name` = SampleName)) %>%
   pivot_longer(cols = starts_with("Allele"), names_to = "name", values_to = "Allele") %>%
   select(-name) %>%
   rename(SampleName = `Sample Name`) %>%
-  arrange(SampleName, Marker, Allele)
+  arrange(SampleName, Marker, Allele) %>%
+  distinct()
 
 write_csv(reference, file = "../example_data/bistro_input/reference_database.csv")
 
