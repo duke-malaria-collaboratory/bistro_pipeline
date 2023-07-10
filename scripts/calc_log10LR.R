@@ -9,7 +9,8 @@
 
 # Load libraries
 suppressPackageStartupMessages(library(tidyverse))
-library(euroformix)
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(euroformix))
 
 mozzie_ids_all <- read_csv(snakemake@input[[3]]) %>% pull(SampleName) %>% unique() %>% suppressMessages()
 
@@ -61,6 +62,7 @@ if(no_ref_peaks){
 
 # Read in more data and set parameters
 refData <- read_rds(snakemake@input[[2]]) %>% suppressMessages()
+print(names(refData)) 
 numRefs <- length(refData)
 kit <- snakemake@params[[1]]
 #noc <- as.numeric(snakemake@params[[2]])
@@ -69,7 +71,10 @@ threshT <- snakemake@params[[2]]
 difftol <- snakemake@params[[3]]
 threads <- snakemake@params[[4]]
 seed <- snakemake@params[[5]]
-time_limit <- snakemake@params[[6]] # in seconds
+time_limit <- snakemake@params[[6]] # in minutes
+modelDegrad <- as.logical(snakemake@params[[7]])
+modelBWstutt <- as.logical(snakemake@params[[8]])
+modelFWstutt <- as.logical(snakemake@params[[9]])
 
 cat(paste0('NOC: ', efm_noc, '\n'))
 cat(paste0('Number of references: ', numRefs, '\n'))
@@ -79,34 +84,44 @@ cat(paste0('Calculating log10LRs for each reference\n'))
 LRs_1moz <- tibble(sample_evidence = character(numRefs), m_locus_count = m_locus_count, sample_reference = NA, min_noc = min_noc,  efm_noc = efm_noc, log10LR = NA, note = NA)
 
 # Calcualte logLR for each human
-time_try <- tryCatch({
-{
-setTimeLimit(time_limit) # in seconds
-for(i in 1:numRefs){
-  print(i)  
-  out <- tryCatch({output <- contLikSearch(NOC=efm_noc, modelDegrad=as.logical(snakemake@params[[7]]), modelBWstutt=as.logical(snakemake@params[[8]]), modelFWstutt=as.logical(snakemake@params[[9]]), samples=sample, popFreq=freq_list, refData=refData, condOrder=rep(0,length(refData)), knownRefPOI=i, prC=0.05, threshT=threshT, lambda=0.01, kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
-    output$outtable[3]
-    },
-    error = function(cond) return('euroformix error')
-)
+for(i in 1:numRefs) {
+  print(i)
+  note <- tryCatch(expr = {
+    withTimeout({
+        output <- contLikSearch(NOC=efm_noc,
+				modelDegrad=modelDegrad, modelBWstutt=modelBWstutt, modelFWstutt=modelFWstutt,
+				samples=sample, popFreq=freq_list, refData=refData,
+				condOrder=rep(0,length(refData)), knownRefPOI=i,
+				prC=0.05, threshT=threshT, lambda=0.01,
+				kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
+        output$outtable[3]
+    }, timeout = 60*time_limit, elapsed = 60*time_limit)
+  },
+  error = function(err) return(err)
+  )
+  
   LRs_1moz$sample_evidence[i] <- names(sample)
   LRs_1moz$sample_reference[i] <- names(refData)[i]
-  LRs_1moz$log10LR[i] <- out
-  if(out == 'euroformix error'){
-     LRs_1moz$note[i] <- 'euroformix error'
-     LRs_1moz$log10LR[i] <- NA
-  }
+
+  print(note)
   
+  if(str_detect(as.character(note), "reached elapsed time limit")) {
+    LRs_1moz$note[i] <- "timed out"
+    LRs_1moz$log10LR[i] <- NA
+  } else if (is.numeric(note)) {
+    LRs_1moz$note[i] <- NA
+    LRs_1moz$log10LR[i] <- note
+  } else {
+    LRs_1moz$note[i] <- "euroformix error"
+    LRs_1moz$log10LR[i] <- NA
+  }
 }
-'Worked'
-}
-},
-error = function(cond) return('Timed out')
-)
+
 
 # Save df as .csv
 LRs_1moz %>% 
-    mutate(note = ifelse(is.na(log10LR) & time_try == 'Timed out', 'Timed out', note)) %>%
-    write_csv(snakemake@output[[1]])
+   #mutate(note = ifelse(is.na(log10LR) & time_try == 'Timed out', 'Timed out', note)) %>%
+   #print(n = Inf)
+   write_csv(snakemake@output[[1]])
 }
 } 

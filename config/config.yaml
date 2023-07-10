@@ -16,7 +16,7 @@ threshT: 200 # peak detection threshold (all peaks under this threshold are filt
 difftol: 0.01 # tolerance for difference in log likelihoods across 2 iterations
 threads: 4 # number of threads to use when calculating log10LRs
 seed: 1 # seed when calculating log10LRs
-time_limit: 180 # time limit in seconds to run euroformix on 1 bloodmeal-human pair. note that if you want to run it for more than 2 days total, you'll have to change the config/slurm/cluster.yaml file as well
+time_limit: 3 # time limit in minutes to run euroformix on 1 bloodmeal-human pair. note that if you want to run it for more than 2 days total, you'll have to change the config/slurm/cluster.yaml file as well
 modelDegrad: TRUE # whether or not to model degradation. Can be TRUE or FALSE
 modelBWstutt: FALSE # whether or not to model backward stutter. Can be TRUE or FALSE. TRUE will likely take longer to run
 modelFWstutt: FALSE # whether or not to model backward stutter. Can be TRUE or FALSE. TRUE will likely take longer to run
