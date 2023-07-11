@@ -5,7 +5,8 @@ channels:
   - defaults
   - r
 dependencies:
-  - r-tidyverse
-  - r-devtools
-  - r-codetools
-  - snakemake
+  - r-base=4.2.3
+  - r-tidyverse=2.0.0
+  - r-devtools=2.4.5
+  - r-codetools=0.2.19
+  - snakemake=7.30.1

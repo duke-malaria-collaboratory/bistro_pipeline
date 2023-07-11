@@ -41,7 +41,7 @@ git clone https://github.com/duke-malaria-collaboratory/bistro.git # download th
 cd bistro # move into the bistro directory
 mamba env create -f config/environment/bistro.yaml # create the bistro conda environment
 conda activate bistro # activate the bistro conda environment
-Rscript -e "devtools::install_github('https://github.com/oyvble/euroformix.git')" # install euroformix in environment
+Rscript -e "devtools::install_github('https://github.com/oyvble/euroformix.git', ref = 'v4.0.7')" # install euroformix in environment
 ```
 
 Note that you will have to activate the conda environment each time you open a new terminal:
@@ -118,7 +118,7 @@ If you would like to input population allele frequencies, the csv file should co
 
 ### Selecting the STR genotyping kit
 
-The `contLikSearch()` function from the `euroformix` package requires an STR genotyping `kit` argument, which can be set in `config/config.yaml`. `euroformix` already has kit parameters for 23 common STR genotyping kits. To find a list of available kits, use the `getKit()` function after loading `euroformix`. We have additionally added parameters for the Promega GenePrint10 System (kit name: GenePrint10) for this pipeline. If the kit you used to genotype samples is not available in the defaults, please modify `kit.txt` (filepath: `euroformix/extdata/kit.txt`) within the `euroformix` package in the conda environment with the appropriate kit parameters. The required parameters can usually be found on the kit manufacturer's documentation and/or website.
+The `contLikSearch()` function from the `euroformix` package requires an STR genotyping `kit` argument, which can be set in `config/config.yaml`. `euroformix` already has kit parameters for 23 common STR genotyping kits. To find a list of available kits, use the `getKit()` function after loading `euroformix`. We have additionally added parameters for the Promega GenePrint10 System (kit name: GenePrint10) for this pipeline. If the kit you used to genotype samples is not available in the defaults, please modify `kit.txt` (filepath: `./miniconda3/envs/bistro/lib/R/library/euroformix/extdata/kit.txt`) within the `euroformix` package in the conda environment with the appropriate kit parameters. The required parameters can usually be found on the kit manufacturer's documentation and/or website.
 
 ## Output files
 
