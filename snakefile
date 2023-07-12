@@ -95,7 +95,7 @@ rule calc_log10LR:
   input:
     hum_allele_freqs_rds,
     hum_profiles_rds,
-    moz_profiles_formatted,
+    moz_profiles_csv,
     min_noc_csv,
     'output/data/bloodmeals/{moz_id}_profile.rds'
   params:
