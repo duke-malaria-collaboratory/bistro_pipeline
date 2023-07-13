@@ -64,7 +64,8 @@ if(nrow(subset_lrs) == 0){
            match = "No",
            sample_reference = NA,
            log10LR = NA,
-           note = paste(note, collapse = ", "))
+           note = paste(note, collapse = ", "),
+           thresh_low = NA)
   
 } 
 
@@ -73,7 +74,8 @@ if(nrow(subset_lrs) <= lrs$min_noc[1]){
   matches <- subset_lrs %>%
     select(sample_evidence, min_noc, m_locus_count, sample_reference, log10LR, note) %>%
     mutate(match = "Yes",
-           note = "Passed all filters")
+           note = "Passed all filters",
+           thresh_low = 1)
   
 } else {
   
