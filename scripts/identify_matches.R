@@ -48,7 +48,7 @@ get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
 ###### check for all NA log10LRs or log10LRS < 1 ######
 
 subset_lrs <- lrs %>%
-  filter(log10LR > 1)
+  filter(log10LR > 1.5)
 
 if(nrow(subset_lrs) == 0){
   
