@@ -24,11 +24,11 @@ if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){
   # Write empty file if mozzie profile doesn't have any peaks
   tibble(sample_evidence = snakemake@wildcards$moz_id, 
          sample_reference = NA,
-         m_locus_count = m_locus_count, 
-         min_noc = min_noc,
+         m_locus_count = 0, 
+         min_noc = 0,
          efm_noc = NA,
          log10LR = NA,
-         note = 'No peaks') %>%
+         note = 'No peaks') %>% 
   write_csv(snakemake@output[[1]])
 }else{
 

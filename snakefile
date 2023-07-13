@@ -43,6 +43,7 @@ rule all:
 # calculate human population allele frequencies if needed
 if hum_allele_freqs_csv == 'None':
   hum_allele_freqs_csv = 'output/data/' + re.sub(".csv", "_allele_freqs.csv", re.sub('.*/', '', hum_profiles_csv))
+  hum_allele_freqs_rds = re.sub('.csv', '.rds', hum_allele_freqs_csv)
 
   rule get_hum_allele_freqs:
     input:
@@ -95,7 +96,7 @@ rule calc_log10LR:
   input:
     hum_allele_freqs_rds,
     hum_profiles_rds,
-    moz_profiles_csv,
+    moz_profiles_formatted,
     min_noc_csv,
     'output/data/bloodmeals/{moz_id}_profile.rds'
   params:
