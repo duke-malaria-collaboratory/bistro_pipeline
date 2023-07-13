@@ -75,7 +75,7 @@ if(nrow(subset_lrs) <= lrs$min_noc[1]){
     select(sample_evidence, min_noc, m_locus_count, sample_reference, log10LR, note) %>%
     mutate(match = "Yes",
            note = "Passed all filters",
-           thresh_low = 1)
+           thresh_low = "<= 1")
   
 } else {
   
