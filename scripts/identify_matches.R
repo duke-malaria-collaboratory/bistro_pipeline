@@ -1,59 +1,32 @@
-
-
+# load libraries
 suppressPackageStartupMessages(library(tidyverse))
 
 ###### read data in for one mosquito ######
 lrs <- read_csv(snakemake@input[[1]]) %>% suppressMessages() 
 
-
-
 ###### function to get matches from LRs for 1 mosquito at a given threshold ######
 
 get_matches_1moz <- function(moz_lrs, lr_thresh, norm_thresh){
   moz_lrs %>%
-    #remove euroformix and time-out errors
-    filter(!note %in% c("euroformix error", "timed out") | is.na(note)) %>% 
-    # non-matches
-    mutate(all_bad = all(log10LR < lr_thresh | is.na(log10LR) | is.infinite(log10LR)),
-           note = ifelse(all_bad & is.na(note), 'All log10LR < thresh', note),
-           sample_reference = ifelse(all_bad, NA, sample_reference),
-           log10LR = ifelse(all_bad, NA, log10LR)) %>%
-    distinct() %>%
-    # potential matches - ambiguous
-    filter((log10LR >= lr_thresh & !is.infinite(log10LR)) | !is.na(note)) %>%
-    #mutate(prefilt_lr_norm = log10LR/sum(log10LR)*min_noc, # use logs or not? 
-    #       all_norm_lt_thresh = all(prefilt_lr_norm < norm_thresh & is.na(note)),
-    #       note = ifelse(all_norm_lt_thresh, 'Ambiguous matches only', note),
-    #       sample_reference = ifelse(all_norm_lt_thresh, NA, sample_reference),
-    #       log10LR = ifelse(all_norm_lt_thresh, NA, log10LR),
-    #       prefilt_lr_norm = ifelse(all_norm_lt_thresh, NA, prefilt_lr_norm)) %>%
-    distinct() %>%
-    # potential matches - less ambiguous
-    #filter(prefilt_lr_norm >= norm_thresh | !is.na(note)) %>%
-    mutate(n_refs_gt_thresh = n_distinct(sample_reference[log10LR > lr_thresh]),
-           n_refs_gt_min_noc = ifelse(n_refs_gt_thresh > min_noc, '> min NOC matches', 'Passed all filters'),
-           note = ifelse(is.na(note), n_refs_gt_min_noc, note),
-           match = case_when(note == 'Passed all filters' ~ 'Yes',
-                             #note == '> min NOC matches' ~ 'Maybe',
-                             TRUE ~ 'No') #,
-           #sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
-           #log10LR = ifelse(note == '> min NOC matches', NA, log10LR)
+    filter(log10LR >= lr_thresh) %>%
+    mutate(note = ifelse(n() > min_noc, '> min NOC matches', 'Passed all filters'),
+           match = ifelse(note == 'Passed all filters', 'Yes', 'No'),
+           sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
+           log10LR = ifelse(note == '> min NOC matches', NA, log10LR)
           ) %>%
-    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note) #%>%
-    #distinct() 
+    select(sample_evidence, min_noc, m_locus_count, match, sample_reference, log10LR, note) %>%
+    distinct() 
 }
-
-
 
 ###### check for all NA log10LRs or log10LRS < 1 ######
 
 subset_lrs <- lrs %>%
-  filter(log10LR > 1.5)
+  filter(log10LR > 1 & !is.infinite(log10LR))
 
-if(nrow(subset_lrs) == 0){
+if(max(subset_lrs$log10LR) < 1.5){
   
   note <- lrs %>%
-    mutate(note = case_when(is.na(note) ~ "all log10LR < 1",
+    mutate(note = case_when(is.na(note) ~ "All log10LR < 1.5",
                             TRUE ~ note)) %>%
     pull(note) %>%
     unique()
@@ -64,18 +37,8 @@ if(nrow(subset_lrs) == 0){
            match = "No",
            sample_reference = NA,
            log10LR = NA,
-           note = paste(note, collapse = ", "),
+           note = str_c(note, collapse = ";"),
            thresh_low = NA)
-  
-# } 
-# 
-# if(nrow(subset_lrs) <= lrs$min_noc[1]){
-#   
-#   matches <- subset_lrs %>%
-#     select(sample_evidence, min_noc, m_locus_count, sample_reference, log10LR, note) %>%
-#     mutate(match = "Yes",
-#            note = "Passed all filters",
-#            thresh_low = "<= 1")
   
 } else {
   
@@ -83,85 +46,74 @@ if(nrow(subset_lrs) == 0){
   
   # set initial match conditions
   
-  thresh = 10.5
+  thresh = floor(max(subset_lrs$log10LR)*2)/2 #10.5
   
-  matches <- get_matches_1moz(moz_lrs = subset_lrs, lr_thresh = thresh, norm_thresh = 0.5) %>%
+  matches <- get_matches_1moz(moz_lrs = subset_lrs, lr_thresh = thresh) %>%
     mutate(thresh_low = thresh)
-  
+
   mht <- matches %>%
     arrange(sample_reference) %>%
     pull(sample_reference)
   
-  mlt <- "placeholder"
-  
   df <- matches %>%
-    mutate(thresh_low = 10.5)
+    mutate(thresh_low = thresh)
   
-  thresh = 10
-  
+  thresh = thresh - 0.5
+
   # screen thresholds
   while(TRUE){
-    matches <- get_matches_1moz(moz_lrs = subset_lrs, lr_thresh = thresh, norm_thresh = 0.5) %>%
+    matches <- get_matches_1moz(moz_lrs = subset_lrs, lr_thresh = thresh) %>%
       mutate(thresh_low = thresh)
-    
+
     df <- df %>%
       bind_rows(matches)
     
+    thresh = thresh - 0.5
+
+    if(thresh == 0.5){
+      break
+    }
+
     mlt <- matches %>%
       arrange(sample_reference) %>%
       pull(sample_reference)
     
-    if(identical(mht, mlt) & nrow(matches) >= matches$min_noc[1] & !all(is.na(mlt))) {
+    if((identical(mht, mlt) & nrow(matches) == matches$min_noc[1]) | matches$note[1] == '> min NOC matches') { # & !all(is.na(mlt))) {
       break
     }
-    
-    thresh = thresh - 0.5
-    
+
     mht <- mlt
-    mlt <- "placeholder"
-    
-    if(thresh == 0.5){
-      break
-    }
     
   }
-  
-  if(nrow(matches) != matches$min_noc[1]){
-    
+ 
+  if(nrow(matches) < matches$min_noc[1] | matches$note[1] == '> min NOC matches'){
     temp <- df %>%
+      filter(note != '> min NOC matches') %>%
       group_by(thresh_low) %>%
       mutate(sample_reference = str_c(sample_reference, collapse = ","),
              log10LR = str_c(log10LR, collapse = ",")) %>%
       ungroup() %>%
       distinct() %>%
-      filter(!is.na(sample_reference)) %>%
+      #filter(!is.na(sample_reference)) %>%
       arrange(thresh_low) %>%
       mutate(next_same = sample_reference == lead(sample_reference) & note == lead(note)) %>% 
-      filter(next_same == TRUE) %>%
+      filter(next_same) %>%
       slice_max(thresh_low) %>%
       separate_rows(sample_reference, log10LR, sep = ",") %>%
       mutate(log10LR = as.numeric(log10LR)) %>%
       select(-next_same)
-    
+
     if(nrow(temp) > 0){
       matches <- temp
     }
     
   }
-  
-  
+    
 }
-
 
 
 ##### save matches df as a .csv ####
 
 matches %>% 
-  mutate(sample_reference = ifelse(note == '> min NOC matches', NA, sample_reference),
-         log10LR = ifelse(note == '> min NOC matches', NA, log10LR)) %>% 
-  distinct() %>% 
   write_csv(snakemake@output[[1]])
-
-
-
 
