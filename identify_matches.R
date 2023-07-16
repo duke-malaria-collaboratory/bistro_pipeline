@@ -90,17 +90,20 @@ if(max(subset_lrs$log10LR) < 1.5){
     temp <- df %>%
       filter(note != '> min NOC matches') %>%
       group_by(thresh_low) %>%
-      mutate(sample_reference = str_c(sample_reference, collapse = ","),
+      mutate(n_samps = n_distinct(sample_reference),
+             sample_reference = str_c(sample_reference, collapse = ","),
              log10LR = str_c(log10LR, collapse = ",")) %>%
       ungroup() %>%
       distinct() %>%
       #filter(!is.na(sample_reference)) %>%
       arrange(thresh_low) %>%
-      mutate(next_same = sample_reference == lead(sample_reference) & note == lead(note)) %>% 
+      mutate(next_same = sample_reference == lead(sample_reference) & note == lead(note)) %>%
       filter(next_same) %>%
+      filter(n_samps == max(n_samps)) %>%
       slice_max(thresh_low) %>%
       separate_rows(sample_reference, log10LR, sep = ",") %>%
       mutate(log10LR = as.numeric(log10LR)) %>%
+      #data.frame() %>% print()
       select(-next_same)
 
     if(nrow(temp) > 0){
