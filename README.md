@@ -72,7 +72,15 @@ conda activate bistro # be sure you've activated the environment!
 snakemake -n # dry-run
 ```
 
-If this runs successfully, then run:
+If this runs successfully, then run one of the following.
+
+To run it from the command line:
+
+```
+bash submit_slurm.sbat # run from the command line
+```
+
+To run it on the cluster: 
 
 ```
 sbatch submit_slurm.sbat # submit the job to the cluster
