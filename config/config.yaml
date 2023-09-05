@@ -2,21 +2,22 @@
 
 # Input file pathnames, change if needed
 # See README for more information on formatting input files
-hum_profiles_csv: 'example_data/bistro_input/reference_database.csv' # human STR profiles; csv required
-bm_profiles_csv: 'example_data/bistro_input/evidence.csv' # bloodmeal STR profiles; csv required
-hum_allele_freqs_csv: 'example_data/bistro_input/allele_freqs.csv' # human population allele frequencies; optional csv. If None, allele frequencies will be calculated using data from hum_profiles_csv.
+bm_profiles_csv: 'example_data/bloodmeal_profiles.csv' # bloodmeal STR profiles; csv required
+hum_profiles_csv: 'example_data/human_profiles.csv' # human STR profiles; csv required
+hum_allele_freqs_csv: 'example_data/pop_allele_freqs.csv' # human population allele frequencies; optional csv. If None, allele frequencies will be calculated using data from hum_profiles_csv.
 
-# Default output file path names 
+# Default output file path names
 lr_outfile: 'output/log10LRs.csv' # csv output of log10LRs
 match_outfile: 'output/matches.csv' # csv output of matches
 
 # Other parameters
 kit: "ESX17" # STR kit name
-threshT: 200 # peak detection threshold (all peaks under this threshold are filtered out)
+peak_thresh: 200 # peak detection threshold (all peaks under this threshold are filtered out)
+rm_twins: TRUE # whether or not to remove twins prior to identifying matches
+model_degrad: TRUE # whether or not to model degradation. Can be TRUE or FALSE
+model_bw_stutt: FALSE # whether or not to model backward stutter. Can be TRUE or FALSE. TRUE will likely take longer to run
+model_fw_stutt: FALSE # whether or not to model backward stutter. Can be TRUE or FALSE. TRUE will likely take longer to run
 difftol: 1 # tolerance for difference in log likelihoods across 2 iterations
 threads: 4 # number of threads to use when calculating log10LRs
 seed: 1 # seed when calculating log10LRs
 time_limit: 3 # time limit in minutes to run euroformix on 1 bloodmeal-human pair. note that if you want to run it for more than 2 days total, you'll have to change the config/slurm/cluster.yaml file as well
-modelDegrad: TRUE # whether or not to model degradation. Can be TRUE or FALSE
-modelBWstutt: FALSE # whether or not to model backward stutter. Can be TRUE or FALSE. TRUE will likely take longer to run
-modelFWstutt: FALSE # whether or not to model backward stutter. Can be TRUE or FALSE. TRUE will likely take longer to run

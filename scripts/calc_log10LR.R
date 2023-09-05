@@ -1,127 +1,39 @@
-#################################################
-#                                               #
-#    Generate logLR for mosquito-human pairs    #
-#                 Once Bitten                   #
-#             C Markwalter & Z Lapp             #
-#                January 2023                   #
-#                                               #
-#################################################
+# Load library
+library(bistro)
 
-# Load libraries
-suppressPackageStartupMessages(library(tidyverse))
-suppressPackageStartupMessages(library(R.utils))
-suppressPackageStartupMessages(library(euroformix))
+# Read in data and set parameters
+bm_id <- snakemake@wildcards$bm_id
+threshT <- snakemake@params$peak_thresh
+bm_data <- readr::read_csv(snakemake@input$bm_profiles_csv) |>
+  dplyr::filter(SampleName == bm_id) |>
+  bistro::filter_peaks(threshT) |>
+  suppressMessages()
+hu_data <- readr::read_csv(snakemake@input$hum_profiles_csv) |>
+  suppressMessages()
+if(snakemake@params$rm_twins) hu_data <- bistro::rm_twins(hu_data)
+allele_freqs <- readr::read_csv(snakemake@input$hum_allele_freqs_csv) |>
+  suppressMessages()
+kit <- snakemake@params$kit
+difftol <- snakemake@params$difftol
+threads <- snakemake@params$threads
+seed <- snakemake@params$seed
+time_limit <- snakemake@params$time_limit # in minutes
+modelDegrad <- as.logical(snakemake@params$model_degrad)
+modelBWstutt <- as.logical(snakemake@params$model_bw_stutt)
+modelFWstutt <- as.logical(snakemake@params$model_fw_stutt)
 
-mozzie_ids_all <- read_csv(snakemake@input[[3]], col_types = cols(.default = col_character())) %>% pull(SampleName) %>% unique() %>% suppressMessages()
-
-noc_dat <- read_csv(snakemake@input[[4]]) %>%
-         filter(SampleName == snakemake@wildcards$moz_id) %>% suppressMessages()
-m_locus_count <- noc_dat %>% pull(m_locus_count)
-min_noc <- noc_dat %>% pull(min_noc)
-
-# Only run euroformix if mozzie profile has peaks
-if(!snakemake@wildcards$moz_id %in% mozzie_ids_all){
-  # Write empty file if mozzie profile doesn't have any peaks
-  tibble(sample_evidence = snakemake@wildcards$moz_id, 
-         sample_reference = NA,
-         m_locus_count = 0, 
-         min_noc = 0,
-         efm_noc = NA,
-         log10LR = NA,
-         note = 'No peaks') %>% 
-  write_csv(snakemake@output[[1]])
-}else{
-
-# Read in data
-freq_list <- read_rds(snakemake@input[[1]]) %>% suppressMessages()
-sample <- read_rds(snakemake@input[[5]]) %>% suppressMessages()
-
-# Don't run euroformix if none of the peaks in the sample are in the reference dataset
-freq_df <- freq_list %>%
-    map(enframe) %>%
-    bind_rows(.id='Marker') %>% 
-    rename(adata = name, freq = value)
-no_ref_peaks <- sample[[1]] %>%
-    map(as_tibble) %>%
-    bind_rows(.id='Marker') %>%
-    left_join(freq_df) %>%
-    summarize(all_na = all(is.na(freq))) %>%
-    pull(all_na)
-
-if(no_ref_peaks){
-  # Write empty file if mozzie profile doesn't have any peaks in ref db
-  tibble(sample_evidence = snakemake@wildcards$moz_id,
-         m_locus_count = m_locus_count,
-         sample_reference = NA,
-         min_noc = min_noc,
-         efm_noc = NA,
-         log10LR = NA,
-         note = 'No peaks in reference database') %>%
-  write_csv(snakemake@output[[1]])
-}else{
-
-# Read in more data and set parameters
-refData <- read_rds(snakemake@input[[2]]) %>% suppressMessages()
-print(names(refData)) 
-numRefs <- length(refData)
-kit <- snakemake@params[[1]]
-#noc <- as.numeric(snakemake@params[[2]])
-efm_noc <- noc_dat %>% pull(efm_noc) 
-threshT <- snakemake@params[[2]]
-difftol <- snakemake@params[[3]]
-threads <- snakemake@params[[4]]
-seed <- snakemake@params[[5]]
-time_limit <- snakemake@params[[6]] # in minutes
-modelDegrad <- as.logical(snakemake@params[[7]])
-modelBWstutt <- as.logical(snakemake@params[[8]])
-modelFWstutt <- as.logical(snakemake@params[[9]])
-
-cat(paste0('NOC: ', efm_noc, '\n'))
-cat(paste0('Number of references: ', numRefs, '\n'))
-cat(paste0('Calculating log10LRs for each reference\n'))
-
-# Set up df
-LRs_1moz <- tibble(sample_evidence = character(numRefs), m_locus_count = m_locus_count, sample_reference = NA, min_noc = min_noc,  efm_noc = efm_noc, log10LR = NA, note = NA)
-
-# Calcualte logLR for each human
-for(i in 1:numRefs) {
-  print(i)
-  note <- tryCatch(expr = {
-    withTimeout({
-        output <- contLikSearch(NOC=efm_noc,
-				modelDegrad=modelDegrad, modelBWstutt=modelBWstutt, modelFWstutt=modelFWstutt,
-				samples=sample, popFreq=freq_list, refData=refData,
-				condOrder=rep(0,length(refData)), knownRefPOI=i,
-				prC=0.05, threshT=threshT, lambda=0.01,
-				kit=kit, nDone=2, seed=seed, difftol=difftol, maxThreads=threads, verbose=FALSE)
-        output$outtable[3]
-    }, timeout = 60*time_limit, elapsed = 60*time_limit)
-  },
-  error = function(err) return(err)
-  )
-  
-  LRs_1moz$sample_evidence[i] <- names(sample)
-  LRs_1moz$sample_reference[i] <- names(refData)[i]
-
-  print(note)
-  
-  if(str_detect(as.character(note), "reached elapsed time limit")) {
-    LRs_1moz$note[i] <- "timed out"
-    LRs_1moz$log10LR[i] <- NA
-  } else if (is.numeric(note)) {
-    LRs_1moz$note[i] <- NA
-    LRs_1moz$log10LR[i] <- note
-  } else {
-    LRs_1moz$note[i] <- "euroformix error"
-    LRs_1moz$log10LR[i] <- NA
-  }
-}
-
-
-# Save df as .csv
-LRs_1moz %>% 
-   #mutate(note = ifelse(is.na(log10LR) & time_try == 'Timed out', 'Timed out', note)) %>%
-   #print(n = Inf)
-   write_csv(snakemake@output[[1]])
-}
-} 
+# Calcualte logLR for each human and save to csv
+bistro::calc_log10_lrs(bloodmeal_profiles = bm_data,
+               human_profiles = hu_data,
+               pop_allele_freqs = allele_freqs,
+               kit = kit,
+               peak_thresh = threshT,
+               bloodmeal_id = bm_id,
+               model_degrad = modelDegrad,
+               model_bw_stutt = modelBWstutt,
+               model_fw_stutt = modelFWstutt,
+               difftol = difftol,
+               threads = threads,
+               seed = seed,
+               time_limit = time_limit) |>
+   readr::write_csv(snakemake@output[[1]])

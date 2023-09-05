@@ -8,42 +8,42 @@ import csv
 configfile: "config/config.yaml"
 
 # get paths
+bm_profiles_csv = config['bm_profiles_csv']
 hum_profiles_csv = config['hum_profiles_csv']
-moz_profiles_csv = config['bm_profiles_csv']
 hum_allele_freqs_csv = config['hum_allele_freqs_csv']
 hum_profiles_formatted = 'output/data/' + re.sub('.csv', '_formatted.csv', re.sub('.*/', '', hum_profiles_csv))
-moz_profiles_formatted = 'output/data/' + re.sub('.csv', '_formatted.csv', re.sub('.*/', '', moz_profiles_csv))
-min_noc_csv = 'output/data/min_noc.csv'
-hum_allele_freqs_rds = 'output/data/' + re.sub('.csv', '.rds', re.sub('.*/', '', hum_allele_freqs_csv))
-hum_profiles_rds = re.sub('_formatted.csv', '_formatted.rds', hum_profiles_formatted)
+bm_profiles_formatted = 'output/data/' + re.sub('.csv', '_formatted.csv', re.sub('.*/', '', bm_profiles_csv))
 lr_outfile = config['lr_outfile']
 match_outfile = config['match_outfile']
 kit = config['kit']
-threshT = config['threshT']
+peak_thresh = config['peak_thresh']
+rm_twins = config['rm_twins']
+model_degrad = config['model_degrad']
+model_bw_stutt = config['model_bw_stutt']
+model_fw_stutt = config['model_fw_stutt']
 difftol = config['difftol']
 threads = config['threads']
 seed = config['seed']
 time_limit = config['time_limit']
-modelDegrad = config['modelDegrad']
-modelBWstutt = config['modelBWstutt']
-modelFWstutt = config['modelFWstutt']
 
-# get mozzie ids
-with open(moz_profiles_csv) as f:
+
+# get bloodmeal ids
+with open(bm_profiles_csv) as f:
     next(f)
     reader = csv.reader(f, delimiter=',')
-    moz_ids = set([row[0] for row in reader])
+    bm_ids = set([row[0] for row in reader])
 
 # what we want to output
 rule all:
   input:
+    expand('output/log10LRs_by_bloodmeal/{bm_id}_log10LRs.csv', bm_id=bm_ids),
     lr_outfile,
     match_outfile
 
 # calculate human population allele frequencies if needed
 if hum_allele_freqs_csv == 'None':
+  print('Calculating human population allele frequencies from human profiles')
   hum_allele_freqs_csv = 'output/data/' + re.sub(".csv", "_allele_freqs.csv", re.sub('.*/', '', hum_profiles_csv))
-  hum_allele_freqs_rds = re.sub('.csv', '.rds', hum_allele_freqs_csv)
 
   rule get_hum_allele_freqs:
     input:
@@ -51,91 +51,52 @@ if hum_allele_freqs_csv == 'None':
     output:
       hum_allele_freqs_csv
     script:
-      'scripts/get_hum_allele_freqs.R' 
-
-# get minimum number of contributors for each mosquito
-rule get_min_nocs:
-  input:
-    moz_profiles_csv
-  params:
-    threshT
-  output:
-    min_noc_csv
-  script:
-    'scripts/get_min_nocs.R'
-
-# subset to mozzies we want to analyze
-rule format_input_csvs:
-  input:
-    hum_profiles_csv,
-    moz_profiles_csv
-  params:
-    threshT
-  output:
-    hum_profiles_formatted,
-    moz_profiles_formatted
-  script:
-    'scripts/format_input_csvs.R'
-
-# make data in format required for euroformix
-rule shape_str_data:
-  input:
-    hum_allele_freqs_csv,
-    hum_profiles_formatted,
-    moz_profiles_formatted,
-    moz_profiles_csv
-  output:
-    hum_allele_freqs_rds,
-    hum_profiles_rds,
-    expand('output/data/bloodmeals/{moz_id}_profile.rds', moz_id=moz_ids)
-  script:
-    'scripts/shape_str_data.R'
+      'scripts/get_hum_allele_freqs.R'
 
 # calculate likelihood ratios (each bloodmeal gets an output file)
 rule calc_log10LR:
   input:
-    hum_allele_freqs_rds,
-    hum_profiles_rds,
-    moz_profiles_formatted,
-    min_noc_csv,
-    'output/data/bloodmeals/{moz_id}_profile.rds'
+    hum_allele_freqs_csv=hum_allele_freqs_csv,
+    hum_profiles_csv=hum_profiles_csv,
+    bm_profiles_csv=bm_profiles_csv,
   params:
     kit=kit,
-    threshT=threshT,
-    difftol=difftol,  
+    peak_thresh=peak_thresh,
+    rm_twins=rm_twins,
+    difftol=difftol,
     threads=threads,
     seed=seed,
     time_limit=time_limit,
-    modelDegrad=modelDegrad,
-    modelBWstutt=modelBWstutt,
-    modelFWstutt=modelFWstutt
+    model_degrad=model_degrad,
+    model_bw_stutt=model_bw_stutt,
+    model_fw_stutt=model_fw_stutt
   output:
-    'output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv'
+    'output/log10LRs_by_bloodmeal/{bm_id}_log10LRs.csv'
   script:
     'scripts/calc_log10LR.R'
 
 # identify matches between bloodmeals and humans
 rule identify_matches:
   input:
-    'output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv'
+    'output/log10LRs_by_bloodmeal/{bm_id}_log10LRs.csv'
   output:
-    'output/matches_by_bloodmeal/{moz_id}_matches.csv'
+    'output/matches_by_bloodmeal/{bm_id}_matches.csv'
   script:
     'scripts/identify_matches.R'
 
-# combine likelihood ratios for all bloodmeals 
+# combine likelihood ratios for all bloodmeals
 rule combine_lr_output:
   input:
-    expand('output/log10LRs_by_bloodmeal/{moz_id}_log10LRs.csv', moz_id=moz_ids)
+    expand('output/log10LRs_by_bloodmeal/{bm_id}_log10LRs.csv', bm_id=bm_ids)
   output:
     lr_outfile
   script:
     'scripts/combine_output.R'
 
-# combine likelihood ratios for all bloodmeals 
+# combine likelihood ratios for all bloodmeals
 rule combine_match_output:
   input:
-    expand('output/matches_by_bloodmeal/{moz_id}_matches.csv', moz_id=moz_ids)
+    expand('output/matches_by_bloodmeal/{bm_id}_matches.csv', bm_id=bm_ids)
   output:
     match_outfile
   script:
