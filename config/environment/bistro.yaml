@@ -6,7 +6,6 @@ channels:
   - r
 dependencies:
   - r-base=4.2.3
-  - r-devtools=2.4.5
   - r-dplyr=1.1.2
   - r-readr=2.1.4
   - r-remotes=2.4.2.1

@@ -1,4 +1,4 @@
-# BISTRO: Blood meal Identification by STR Overlap
+# Snakemake workflow to run bistro
 
 This [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline provides a template for using [`bistro`](https://github.com/duke-malaria-collaboratory/bistro) to identify matches between bloodmeals and the people they bit using short tandem repeat (STR) profiles of human blood from freshly fed bloodmeals and from people. 
 
@@ -16,7 +16,7 @@ git clone https://github.com/duke-malaria-collaboratory/bistro_pipeline.git # do
 cd bistro_pipeline # move into the bistro directory
 mamba env create -f config/environment/bistro.yaml # create the bistro conda environment
 conda activate bistro # activate the bistro conda environment
-Rscript -e "devtools::install_github('https://github.com/duke-malaria-collaboratory/bistro.git')" # install bistro in environment
+Rscript -e "remotes::install_github('https://github.com/duke-malaria-collaboratory/bistro.git')" # install bistro in environment
 ```
 
 Note that you will have to activate the conda environment each time you open a new terminal:
