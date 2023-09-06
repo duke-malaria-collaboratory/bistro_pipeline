@@ -6,9 +6,11 @@ bm_id <- snakemake@wildcards$bm_id
 peak_thresh <- snakemake@params$peak_thresh
 bm_data <- readr::read_csv(snakemake@input$bm_profiles_csv) |>
   dplyr::filter(SampleName == bm_id) |>
+  bistro::rm_dups() |>
   bistro::filter_peaks(peak_thresh) |>
   suppressMessages()
 hu_data <- readr::read_csv(snakemake@input$hum_profiles_csv) |>
+  bistro::rm_dups() |>
   suppressMessages()
 if (snakemake@params$rm_twins)
   hu_data <- bistro::rm_twins(hu_data)
