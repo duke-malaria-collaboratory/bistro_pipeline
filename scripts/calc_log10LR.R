@@ -5,15 +5,11 @@ library(bistro)
 bm_id <- snakemake@wildcards$bm_id
 peak_thresh <- snakemake@params$peak_thresh
 bm_data <- readr::read_csv(snakemake@input$bm_profiles_csv) |>
-  dplyr::filter(SampleName == bm_id) |>
-  bistro::rm_dups() |>
-  bistro::filter_peaks(peak_thresh) |>
+  bistro::prep_bloodmeal_profiles(bm_id, peak_thresh, check_heights = FALSE) |>
   suppressMessages()
 hu_data <- readr::read_csv(snakemake@input$hum_profiles_csv) |>
-  bistro::rm_dups() |>
+  bistro::prep_human_profiles(rm_twins = snakemake@params$rm_twins) |>
   suppressMessages()
-if (snakemake@params$rm_twins)
-  hu_data <- bistro::rm_twins(hu_data)
 allele_freqs <-
   readr::read_csv(snakemake@input$hum_allele_freqs_csv) |>
   suppressMessages()
